@@ -146,7 +146,7 @@ async def on_ready():
     if "restart_channel.csv" in os.listdir():
         if len(list(pd.read_csv("restart_channel.csv")['value']))>0:
             await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Hi I'm back 🔥🤝😈")
-            await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Fuck you <@!252070848800882688> and <@!190897913314934784>",allowed_mentions=discord.AllowedMentions(users=False),delete_after=2)
+            await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Fuck you <@!252070848800882688> and <@!190897913314934784>",allowed_mentions=discord.AllowedMentions(users=mention_users),delete_after=2)
     df = pd.DataFrame({"value":[]})
     df.to_csv("restart_channel.csv")
 
@@ -230,23 +230,40 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
         return mk.NewlineText(text)
 text_model = MarkovModel2()
 
+sentences = []
+def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!']):
+    t_start = time.time()
+    def unique(lst):
+        ret = []
+        for s in lst:
+            if s not in ret:
+                ret.append(s)
+        return ret
 
-def Sentence_relevance(question=None,length=150,Nattempt=200,remove_characters=[',','.','?','!']):
+    global sentences
     if question == None:
         return text_model.make_short_sentence(length)
     else:
-        for s in remove_characters:
-            question.replace(s,'')
-        words = question.lower().split()
-        sentences = []
-        Ncommon = np.zeros(Nattempt)
+        if len(sentences)<5000:
+            for s in remove_characters:
+                question.replace(s,'')
+            words = question.lower().split()
+            Ncommon = np.zeros(Nattempt)
+        
         for i in range(Nattempt):
             sentences.append(text_model.make_short_sentence(length))
-            for y in range(len(words)):
-                if words[y] in sentences[i].lower():
-                    if len(words[y])>3 and words[y] not in ['fed','bot']:
-                        Ncommon[i] += 1
-        return sentences[np.argmax(Ncommon)]
+            sentences = unique(sentences)
+        for y in range(len(words)):
+            if words[y] in sentences[i].lower():
+                if len(words[y])>3 and words[y] not in ['bot','fed','fedbot']:
+                    Ncommon[i] += 1
+        returner = sentences[np.argmax(Ncommon)]
+        sentences.remove(returner)
+        if time.time()-t_start > 3:
+            return returner
+        else:
+            time.sleep(3)
+            return returner
 
 
 markov_chance_percentage = 0
@@ -299,7 +316,7 @@ def string_gen(commands,desc):
 
 
 
-
+mention_users = True
 Fun = True
 N_requirement = 4 
 Fredag_post = False
@@ -683,7 +700,7 @@ async def on_message(message):
             except:
                 await message.reply('Invalid syntax',delete_after = 10)
         if message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
-            await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
+            await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
             if messg.author == client.user:
@@ -692,14 +709,14 @@ async def on_message(message):
                     await asyncio.sleep(4)
                     await message.channel.send(your_mom_joke())
                 else:
-                    await message.reply(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
+                    await message.reply(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
         elif client.user in message.mentions or 'fedbot' in message.content.lower() or "fed bot" in message.content.lower() or "markov" in message.content.lower():
             await message.channel.trigger_typing()
             if mom_mention(message.content.lower()):
                 await asyncio.sleep(4)
                 await message.channel.send(your_mom_joke())
             else:
-                await message.channel.send(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
+                await message.channel.send(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
         elif message.author != client.user:
             if message.channel.id not in bot_channels:
                 mark_msg = Generate_sentence(markov_chance_percentage,server_id=message.guild.id)
@@ -707,7 +724,7 @@ async def on_message(message):
                 temp_percentage_chance = markov_chance_percentage + 20 if (markov_chance_percentage + 20)<=100 else 100
                 mark_msg = Generate_sentence(temp_percentage_chance,server_id=message.guild.id)
             if mark_msg != None:
-                await message.channel.send(mark_msg,allowed_mentions=discord.AllowedMentions(users=False))
+                await message.channel.send(mark_msg,allowed_mentions=discord.AllowedMentions(users=mention_users))
     
     if message.author.id in Trusted_IDs and 'fed mode' in message.content.lower():   
         async def Logger(limit=None,channel_id=message.channel.id,skipper = "http",LOC = "./MarkovSource/"):
