@@ -231,7 +231,7 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
 text_model = MarkovModel2()
 
 
-def Sentence_relevance(question=None,length=250,Nattempt=500,remove_characters=[',','.','?','!']):
+def Sentence_relevance(question=None,length=150,Nattempt=200,remove_characters=[',','.','?','!']):
     if question == None:
         return text_model.make_short_sentence(length)
     else:
