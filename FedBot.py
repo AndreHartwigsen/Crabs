@@ -596,7 +596,7 @@ async def on_message(message):
                         user = await client.fetch_user(Id)
                         names.append(str(user.name))
                     except:
-                        names.append(Id)
+                        names.append(str(Id))
                     
             else:
                 for i in range(len(arr)):
