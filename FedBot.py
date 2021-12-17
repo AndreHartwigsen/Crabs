@@ -219,7 +219,7 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
     text = []
     for s in files:
         if 'Logged' in s:
-            text = text + list(pd.read_csv(directory+s)['message'])
+            text = text + [str(s1) for s1 in list(pd.read_csv(directory+s)['message'])]
         elif 'joke' not in s:
             with open(directory+s, encoding="utf8") as f:
                 text = text + NewLineLister(f.read())
@@ -442,6 +442,7 @@ if "levels" not in locals():
         if "SavedScore.csv" in os.listdir("./FedData/"):
             levels = import_score()
         else:
+            print("score not present, resetting score")
             reset_score()
             levels = import_score()
 
