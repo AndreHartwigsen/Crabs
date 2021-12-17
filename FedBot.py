@@ -567,7 +567,7 @@ async def on_message(message):
             lst2 = [str(message.author.created_at)[:10],str(message.author.joined_at)[:10],message.author.top_role.name,str(message.author.activity)]
             embed.add_field(name="User info"  , value=''.join(string_gen(lst1[:2],lst2[:2]))  ,inline=True)
             embed.add_field(name="Server info", value=''.join(string_gen(lst1[2:],lst2[2:]))  ,inline=True)
-            embed.add_field(name="Villain level: %i\nVillain rank: %i"% (level,rank_score(message.author.id)), 
+            embed.add_field(name="Fedbot level: %i\nFedbot rank: %i"% (level,rank_score(message.author.id)), 
                             value="XP: %i `[%s%s]` %i\nCurrent amount of XP: %i\nXP needed for next level: %i"
                             %( xp_low,"#"*(Nmarks-percentage_score),"-"*percentage_score,xp_up,levels['score'][levels['IDs'].index(message.author.id)],remaining ),inline=False)
             if banner != None:
@@ -677,7 +677,7 @@ async def on_message(message):
                     await message.reply('Percentage must be between 0 and 100',delete_after = 10)
             except:
                 await message.reply('Invalid syntax',delete_after = 10)
-        if message.content.lower() == 'ftrigger':
+        if message.content.lower() in ['ftrigger','mtrigger']:
             await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
@@ -696,7 +696,11 @@ async def on_message(message):
             else:
                 await message.channel.send(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
         elif message.author != client.user:
-            mark_msg = Generate_sentence(markov_chance_percentage,server_id=message.guild.id)
+            if message.channel.id not in bot_channels:
+                mark_msg = Generate_sentence(markov_chance_percentage,server_id=message.guild.id)
+            else:
+                temp_percentage_chance = markov_chance_percentage + 20 if (markov_chance_percentage + 20)<=100 else 100
+                mark_msg = Generate_sentence(temp_percentage_chance,server_id=message.guild.id)
             if mark_msg != None:
                 await message.channel.send(mark_msg,allowed_mentions=discord.AllowedMentions(users=False))
     
