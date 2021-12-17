@@ -249,7 +249,7 @@ def Sentence_relevance(question=None,length=250,Nattempt=500,remove_characters=[
         return sentences[np.argmax(Ncommon)]
 
 
-markov_chance_percentage = 5
+markov_chance_percentage = 0
 
 def Generate_sentence(pct=markov_chance_percentage,question=None,length = 250,server_id=466791064175509516):
     if np.random.rand()<pct/100:
@@ -535,7 +535,7 @@ async def get_banner(ID):
 @client.event
 async def on_message(message):
     if score_update(message):
-        await client.get_channel(803014667856904242).send(  f"{message.author.nick} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+        await client.get_channel(803014667856904242).send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
         
         
 
@@ -677,7 +677,7 @@ async def on_message(message):
                     await message.reply('Percentage must be between 0 and 100',delete_after = 10)
             except:
                 await message.reply('Invalid syntax',delete_after = 10)
-        if message.content.lower() in ['ftrigger','mtrigger']:
+        if message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
             await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
@@ -688,7 +688,7 @@ async def on_message(message):
                     await message.channel.send(your_mom_joke())
                 else:
                     await message.reply(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=False))
-        elif client.user in message.mentions or 'fedbot' in message.content.lower():
+        elif client.user in message.mentions or 'fedbot' in message.content.lower() or "fed bot" in message.content.lower() or "markov" in message.content.lower():
             await message.channel.trigger_typing()
             if mom_mention(message.content.lower()):
                 await asyncio.sleep(4)
@@ -724,7 +724,7 @@ async def on_message(message):
                         date.append(d.id)
                         id_author.append(d.author.id)
                         datetime.append(d.created_at)
-                        if i%5000 == 0:
+                        if i%(5000 if limit == None else limit//5) == 0:
                             TN = time.time()
                             TD = TN - T0
                             print('%i done at %i per sec' % (i,i/TD))
@@ -753,6 +753,17 @@ async def on_message(message):
                 except:
                     print("Skipped channel (No permission) %s" %client.get_channel(chid).name)
         await message.author.send('Fed mode finished',delete_after=10)
+        
+    elif message.author.id in Trusted_IDs and message.content.lower() == 'engage recent fed mode':
+        all_channels = [s.id for s in message.guild.text_channels]
+        # print([client.get_channel(channel_id).server.me.permission for channel_id in all_channels])
+        for chid in all_channels: 
+            if chid not in fed_skip:
+                try:
+                    await Logger(5000,channel_id=chid,skipper=None)
+                except:
+                    print("Skipped channel (No permission) %s" %client.get_channel(chid).name)
+        await message.author.send('Recent Fed mode finished',delete_after=10)
     
 
     if (message.channel.id not in markov_block_channels) and message.author.id not in blacklist:
