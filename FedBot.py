@@ -267,7 +267,7 @@ spam_commands = ['ftrigger'
                  ,"shitpost"
                  ]
 spam_desc     = ["Make the Fedbot say something"
-                 ,"Create an exponentially decaying squared sinusoidal wave of [content]. (Only works with GPF and default emojis and any message)"
+                 ,"Create an exponentially decaying squared sinusoidal wave of [content]. (Only works with Crabs and default emojis and any message)"
                  ,"A shitpost"
                  ]
 #-----------------------------------------------------------------------
@@ -390,7 +390,7 @@ villain_extra  = 20
 bot_channels = [69,790]
 
 
-def reset_score(LOC = "./Fed Data/",time_points = 60):
+def reset_score(LOC = "./FedData/",time_points = 60):
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     master_file = pd.concat([pd.read_csv(LOC+s) for s in files])
     
@@ -427,7 +427,7 @@ def reset_score(LOC = "./Fed Data/",time_points = 60):
         global levels
         levels = import_score()
 
-def import_score(LOC = "./Fed Data/"):
+def import_score(LOC = "./FedData/"):
     levels = {}
     file = pd.read_csv(LOC+"SavedScore.csv")
     levels['IDs'] = list(file['User_ID'])
@@ -439,7 +439,7 @@ if "levels" not in locals():
     try:
         levels = import_score()
     except:
-        if "SavedScore.csv" in os.listdir("./Fed Data/"):
+        if "SavedScore.csv" in os.listdir("./FedData/"):
             levels = import_score()
         else:
             reset_score()
@@ -455,7 +455,7 @@ def lvl(points,a=400,b=500,info = False):
     else:
         return level,xp_low,xp_up,remaining
 
-def score_update(message,LOC = "./Fed Data/"):
+def score_update(message,LOC = "./FedData/"):
     ID = message.author.id
     timestamp = message.created_at
     channel = message.channel.id
@@ -486,7 +486,7 @@ def score_update(message,LOC = "./Fed Data/"):
         dfa = pd.concat([df,dff])
         dfa.to_csv(LOC+'LoggedText%i.csv'%(channel),index=False)
     return level_up
-def activity(ID,N=100,LOC = "./Fed Data/"):
+def activity(ID,N=100,LOC = "./FedData/"):
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     master_file = pd.concat([pd.read_csv(LOC+s) for s in files])
     
@@ -539,7 +539,7 @@ async def on_message(message):
         reset_score()
         await message.channel.send("Score reset complete",delete_after=5)
     if message.author.id in Trusted_IDs and message.content.lower() == "send score":
-        await message.author.send("Here is the file",file=discord.File("./Fed Data/SavedScore.csv"))
+        await message.author.send("Here is the file",file=discord.File("./FedData/SavedScore.csv"))
     
     
     
@@ -556,7 +556,7 @@ async def on_message(message):
             banner = await get_banner(message.author.id)
             embed = discord.Embed(colour = message.author.top_role.colour)
             embed.set_author(name=message.author.nick,icon_url=message.author.avatar_url)
-            lst1 = ["Acoount created","Server joined","Top role","Current status"]
+            lst1 = ["Account created","Server joined","Top role","Current status"]
             lst2 = [str(message.author.created_at)[:10],str(message.author.joined_at)[:10],message.author.top_role.name,str(message.author.activity)]
             embed.add_field(name="User info"  , value=''.join(string_gen(lst1[:2],lst2[:2]))  ,inline=True)
             embed.add_field(name="Server info", value=''.join(string_gen(lst1[2:],lst2[2:]))  ,inline=True)
@@ -724,7 +724,7 @@ async def on_message(message):
             await message.author.send('Total of %i messaged logged in %s, taking %i minutes at %i messages per second' % ( i , client.get_channel(channel_id).name , (TD)/60 , i/(TD) ) ,delete_after=60)
             df = pd.DataFrame({'author':author , 'message':messages , 'ID':id_author , 'date':date , "datetime":datetime , "channel":channel_ids})
             df.to_csv(LOC+'LoggedText%i.csv'%(channel_id),index=False)
-            if "Fed Data" in LOC:
+            if "FedData" in LOC:
                 df.to_csv("./MarkovSource/"+'LoggedText%i.csv'%(channel_id),index=False)
 
     if message.author.id in Trusted_IDs and message.content.lower() == 'fedbot, engage fed mode':
@@ -736,7 +736,7 @@ async def on_message(message):
         for chid in all_channels: 
             if chid not in fed_skip:
                 try:
-                    await Logger(channel_id=chid,skipper=None,LOC = "./Fed Data/")
+                    await Logger(channel_id=chid,skipper=None,LOC = "./FedData/")
                 except:
                     print("Skipped channel (No permission) %s" %client.get_channel(chid).name)
         await message.author.send('Fed mode finished',delete_after=10)
