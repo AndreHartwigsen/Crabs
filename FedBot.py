@@ -255,7 +255,7 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             sentences = unique(sentences)
         for y in range(len(words)):
             if words[y] in sentences[i].lower():
-                if len(words[y])>3 and words[y] not in ['bot','fed','fedbot']:
+                if len(words[y])>0 and words[y] not in ['bot','fed','fedbot']:
                     Ncommon[i] += 1
         returner = sentences[np.argmax(Ncommon)]
         sentences.remove(returner)
@@ -821,7 +821,7 @@ async def on_message(message):
             await message.channel.send(f'{message.author.mention}. Only LeCerial and Truxa have the right to touch sperm. 👀')
             
         if Fun:
-            if 'cope' == message.content.lower() or 'seethe' == message.content.lower():
+            if 'cope' == message.content.lower() or 'seethe' == message.content.lower() or 'prolapse' == message.content.lower():
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cope/%s' % Link_selector([s for s in os.listdir("./images/cope/") if '.ini' not in s])))
             if 'bbcum' == message.content.lower()  or 'cum' == message.content.lower() or 'sborra' == message.content.lower():
