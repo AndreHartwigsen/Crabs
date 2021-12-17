@@ -592,8 +592,12 @@ async def on_message(message):
             names = []
             if "fed_skip" in globals():
                 for Id in arr[:,2]:
-                    user = await client.fetch_user(Id)
-                    names.append(str(user.name))
+                    try:
+                        user = await client.fetch_user(Id)
+                        names.append(str(user.name))
+                    except:
+                        names.append(Id)
+                    
             else:
                 for i in range(len(arr)):
                     names.append("Placeholder. %i"% (i+1))
