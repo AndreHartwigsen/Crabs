@@ -386,8 +386,8 @@ def dt_to_time(dt):
     return (convert - epoch).total_seconds()
 points_lower = 15
 points_upper = 25
-villain_extra  = 20
-bot_channels = [69,790]
+FedBot_extra  = 20
+bot_channels = [803014667856904242,69]
 
 
 def reset_score(LOC = "./FedData/",time_points = 60):
@@ -418,7 +418,7 @@ def reset_score(LOC = "./FedData/",time_points = 60):
         spec_time = np.array(dt)[spec_sel]
         spec_channel = np.array(channel)[spec_sel]
         spec_time_villain = spec_time[  [i for i in range(len(spec_time)) if spec_channel[i] in bot_channels]  ]
-        score[i] = np.sum(np.random.randint(points_lower,1+points_upper,N_msg(spec_time))) + villain_extra*N_msg(spec_time_villain)
+        score[i] = np.sum(np.random.randint(points_lower,1+points_upper,N_msg(spec_time))) + FedBot_extra*N_msg(spec_time_villain)
         end_time.append(spec_time[-1])
     
     df = pd.DataFrame({ "User_ID":users , "score":score , "last_msg":end_time })
@@ -463,7 +463,7 @@ def score_update(message,LOC = "./FedData/"):
     level_up = False
     mpier = 0
     if channel in bot_channels:
-        mpier = villain_extra
+        mpier = FedBot_extra
     dt = dt_to_time(str(timestamp))
     if ID in levels['IDs']:
         idx = levels['IDs'].index(ID)
@@ -486,6 +486,16 @@ def score_update(message,LOC = "./FedData/"):
         dfa = pd.concat([df,dff])
         dfa.to_csv(LOC+'LoggedText%i.csv'%(channel),index=False)
     return level_up
+def rank_score(ID):
+    level = levels['score']
+    arr0 = np.zeros([len(level),4],dtype=np.int64)
+    arr0[:,0] = level
+    arr0[:,1] = np.arange(len(level))
+    arr0[:,2] = levels['IDs']
+    arr0[:,3] = lvl(level)
+    
+    arr = arr0[np.argsort(arr0[:,0])][::-1]
+    return list(arr[:,2]).index(ID)+1
 def activity(ID,N=100,LOC = "./FedData/"):
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     master_file = pd.concat([pd.read_csv(LOC+s) for s in files])
@@ -525,16 +535,13 @@ async def get_banner(ID):
 @client.event
 async def on_message(message):
     if score_update(message):
-        await message.channel.send(  f"{message.author.nick} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+        await client.get_channel(803014667856904242).send(  f"{message.author.nick} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
         
         
-    
-        
-        
-        
-        
+
     speak_permission = True
     global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post
+
     if message.author.id in Trusted_IDs and message.content.lower() == "reset score":
         reset_score()
         await message.channel.send("Score reset complete",delete_after=5)
@@ -556,17 +563,19 @@ async def on_message(message):
             banner = await get_banner(message.author.id)
             embed = discord.Embed(colour = message.author.top_role.colour)
             embed.set_author(name=message.author.nick,icon_url=message.author.avatar_url)
-            lst1 = ["Account created","Server joined","Top role","Current status"]
+            lst1 = ["Acoount created","Server joined","Top role","Current status"]
             lst2 = [str(message.author.created_at)[:10],str(message.author.joined_at)[:10],message.author.top_role.name,str(message.author.activity)]
             embed.add_field(name="User info"  , value=''.join(string_gen(lst1[:2],lst2[:2]))  ,inline=True)
             embed.add_field(name="Server info", value=''.join(string_gen(lst1[2:],lst2[2:]))  ,inline=True)
-            embed.add_field(name="Fedbot level: %i"%level, value="XP: %i `[%s%s]` %i\nCurrent amount of XP: %i\nXP needed for next level: %i"%( xp_low,"#"*(Nmarks-percentage_score),"-"*percentage_score,xp_up,levels['score'][levels['IDs'].index(message.author.id)],remaining ),inline=False)
+            embed.add_field(name="Villain level: %i\nVillain rank: %i"% (level,rank_score(message.author.id)), 
+                            value="XP: %i `[%s%s]` %i\nCurrent amount of XP: %i\nXP needed for next level: %i"
+                            %( xp_low,"#"*(Nmarks-percentage_score),"-"*percentage_score,xp_up,levels['score'][levels['IDs'].index(message.author.id)],remaining ),inline=False)
             if banner != None:
                 embed.set_thumbnail(url=banner)
             await message.channel.send(embed=embed)
     
     
-    if message.author != client.user and message.channel.id not in repeat_block_channels and message.content.lower() in ["bbranks","bbrankings","bblevels"]:
+    if message.author != client.user and message.channel.id not in repeat_block_channels and message.content.lower() in ["fbranks","fbrankings","fblevels"]:
         async def ranking_bar():
             level = levels['score']
             arr0 = np.zeros([len(level),4],dtype=np.int64)
@@ -833,12 +842,12 @@ async def on_message(message):
         if 'update bot' == message.content.lower() and message.author.id in Trusted_IDs:
             await message.channel.send('Updating from github')
             if 'win' not in sys.platform:
-                exec_return = os.system('git pull https://github.com/AndreHartwigsen/DinkingBot.git')
+                exec_return = os.system('git pull https://github.com/AndreHartwigsen/Crabs.git')
                 print(exec_return)
         if 'fuck off bot then come back' == message.content.lower() and message.author.id in Trusted_IDs:
             await message.channel.send('Okay restarting')
             if 'win' not in sys.platform:
-                os.system('git pull https://github.com/AndreHartwigsen/DinkingBot.git')
+                os.system('git pull https://github.com/AndreHartwigsen/Crabs.git')
                 await closing_options()
             else:
                 os.execv(sys.executable, ['python'] + sys.argv)
