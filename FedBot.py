@@ -318,7 +318,7 @@ def string_gen(commands,desc):
 
 mention_users = True
 Fun = True
-N_requirement = 4 
+N_requirement = 3
 Fredag_post = False
 
 T0 = [0]
@@ -671,7 +671,7 @@ async def on_message(message):
         async for msg in message.channel.history(limit=7+NNN):
             all_message_history.append(msg.content)
             all_ID_history.append(msg.author.id)
-            if msg.author != client.user:
+            if not message.author.bot : #msg.author != client.user
                 message_history.append(msg.content)
                 ID_history.append(msg.author.id)
         last_message_blocker = len(np.unique([x.lower() for x in message_history[:NNN]])) == 2 and message_history[:NNN][0].lower() not in [x.lower() for x in message_history[:NNN][1:]]
@@ -721,7 +721,7 @@ async def on_message(message):
             if message.channel.id not in bot_channels:
                 mark_msg = Generate_sentence(markov_chance_percentage,server_id=message.guild.id)
             else:
-                temp_percentage_chance = markov_chance_percentage + 20 if (markov_chance_percentage + 20)<=100 else 100
+                temp_percentage_chance = markov_chance_percentage + 10 if (markov_chance_percentage + 10)<=100 else 100
                 mark_msg = Generate_sentence(temp_percentage_chance,server_id=message.guild.id)
             if mark_msg != None:
                 await message.channel.send(mark_msg,allowed_mentions=discord.AllowedMentions(users=mention_users))
