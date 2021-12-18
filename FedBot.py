@@ -256,12 +256,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
         
         for s in remove_characters:
             question.replace(s,'')
-        words = question.lower().split()
+        words = unique(question.lower().split())
         Ncommon = np.zeros(len(sentences))
         for y in range(len(words)):
-            for i in range(len(sentences)):
-                if words[y] in sentences[i].lower():
-                    if len(words[y])>3 and words[y] not in ['bot','fed','fedbot']:
+            if len(words[y])>2 and words[y] not in ['bot','fed','fedbot','markov']:
+                for i in range(len(sentences)):
+                    if words[y] in sentences[i].lower().split():
                         Ncommon[i] += 1
         returner = sentences[np.argmax(Ncommon)]
         sentences.remove(returner)
@@ -567,8 +567,9 @@ async def on_message(message):
     global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post
 
     if message.author.id in Trusted_IDs and message.content.lower() == "reset score":
+        await message.reply("Fedbot™️ resetting score.",delete_after=3)
         reset_score()
-        await message.channel.send("Score reset complete",delete_after=5)
+        await message.reply("Score reset complete",delete_after=5)
     if message.author.id in Trusted_IDs and message.content.lower() == "send score":
         await message.author.send("Here is the file",file=discord.File("./FedData/SavedScore.csv"))
     
