@@ -247,13 +247,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
         if len(sentences)<5000:
             for s in remove_characters:
                 question.replace(s,'')
-            words = question.lower().split()
-            Ncommon = np.zeros(Nattempt)
-        
-        for i in range(Nattempt):
-            sentences.append(text_model.make_short_sentence(length))
+            for i in range(Nattempt):
+                sentences.append(text_model.make_short_sentence(length))
             sentences = unique(sentences)
-        
+
+        words = question.lower().split()
+        Ncommon = np.zeros(len(sentences))
         for y in range(len(words)):
             for i in range(len(sentences)):
                 if words[y] in sentences[i].lower():
