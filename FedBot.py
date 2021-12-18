@@ -253,10 +253,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
         for i in range(Nattempt):
             sentences.append(text_model.make_short_sentence(length))
             sentences = unique(sentences)
+        
         for y in range(len(words)):
-            if words[y] in sentences[i].lower():
-                if len(words[y])>0 and words[y] not in ['bot','fed','fedbot']:
-                    Ncommon[i] += 1
+            for i in range(len(sentences)):
+                if words[y] in sentences[i].lower():
+                    if len(words[y])>3 and words[y] not in ['bot','fed','fedbot']:
+                        Ncommon[i] += 1
         returner = sentences[np.argmax(Ncommon)]
         sentences.remove(returner)
         if time.time()-t_start > 3:
