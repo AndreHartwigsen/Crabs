@@ -231,6 +231,10 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
 text_model = MarkovModel2()
 
 sentences = []
+def fill_markov_library(N=5000,length=250):
+    while len(sentences)<N:
+        sentences.append(text_model.make_short_sentence(length))
+
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!']):
     t_start = time.time()
     def unique(lst):
@@ -245,12 +249,13 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
         return text_model.make_short_sentence(length)
     else:
         if len(sentences)<5000:
-            for s in remove_characters:
-                question.replace(s,'')
             for i in range(Nattempt):
                 sentences.append(text_model.make_short_sentence(length))
             sentences = unique(sentences)
-
+        
+        
+        for s in remove_characters:
+            question.replace(s,'')
         words = question.lower().split()
         Ncommon = np.zeros(len(sentences))
         for y in range(len(words)):
@@ -700,7 +705,11 @@ async def on_message(message):
                     await message.reply('Percentage must be between 0 and 100',delete_after = 10)
             except:
                 await message.reply('Invalid syntax',delete_after = 10)
-        if message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
+        elif message.content.lower() in ["fill sentences","fill library"] and message.author.id in Trusted_IDs:
+            await message.reply("Fedbot™️ library filler activated.",delete_after=3)
+            fill_markov_library()
+            await message.reply("Fedbot™️ library filler finished.",delete_after=5)
+        elif message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
             await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
