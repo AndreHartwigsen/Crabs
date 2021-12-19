@@ -235,7 +235,9 @@ def fill_markov_library(N=5000,length=250):
     while len(sentences)<N:
         sentences.append(text_model.make_short_sentence(length))
 
-def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!']):
+def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
+                       ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
+                       ):
     t_start = time.time()
     def unique(lst):
         ret = []
@@ -259,10 +261,10 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
         words = unique(question.lower().split())
         Ncommon = np.zeros(len(sentences))
         for y in range(len(words)):
-            if len(words[y])>2 and words[y] not in ['bot','fed','fedbot','markov']:
+            if len(words[y])>0 and words[y] not in ignore_words:
                 for i in range(len(sentences)):
                     if words[y] in sentences[i].lower().split():
-                        Ncommon[i] += 1
+                        Ncommon[i] += len(words[y])
         returner = sentences[np.argmax(Ncommon)]
         sentences.remove(returner)
         if time.time()-t_start > 3:
@@ -446,9 +448,8 @@ def reset_score(LOC = "./FedData/",time_points = 60):
     
     df = pd.DataFrame({ "User_ID":users , "score":score , "last_msg":end_time })
     df.to_csv(LOC+"SavedScore.csv",index=False)
-    if "levels" not in locals():
-        global levels
-        levels = import_score()
+    global levels
+    levels = import_score()
 
 def import_score(LOC = "./FedData/"):
     levels = {}
@@ -462,12 +463,10 @@ if "levels" not in locals():
     try:
         levels = import_score()
     except:
-        if "SavedScore.csv" in os.listdir("./FedData/"):
+        if "SavedScore.csv" in os.listdir("./Fed Data/"):
             levels = import_score()
         else:
-            print("score not present, resetting score")
             reset_score()
-            levels = import_score()
 
 def lvl(points,a=400,b=500,info = False):
     level = np.floor((-b+np.sqrt(2*a*np.asarray(points,dtype=np.int64)+b**2)) / a)+1
@@ -559,7 +558,10 @@ async def get_banner(ID):
 @client.event
 async def on_message(message):
     if score_update(message):
-        await client.get_channel(803014667856904242).send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+        if message.guild.id == 466791064175509516:
+            await client.get_channel(803014667856904242).send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+        else:
+            await message.channel.send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
         
         
 
