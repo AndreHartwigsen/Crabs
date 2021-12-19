@@ -407,7 +407,7 @@ fed_skip = [69]
 
 epoch = datetime.datetime.utcfromtimestamp(0)
 def dt_to_time(dt):
-    convert = datetime.datetime.strptime(dt,'%Y-%m-%d %H:%M:%S.%f')
+    convert = datetime.datetime.strptime(str(dt)[:19],'%Y-%m-%d %H:%M:%S')
     return (convert - epoch).total_seconds()
 points_lower = 15
 points_upper = 25
@@ -440,10 +440,10 @@ def reset_score(LOC = "./FedData/",time_points = 60):
     end_time = []
     for i in range(len(users)):
         spec_sel = np.where(IDs == users[i])[0]
-        spec_time = np.array(dt)[spec_sel]
-        spec_channel = np.array(channel)[spec_sel]
+        spec_time = np.asarray(dt)[spec_sel]
+        spec_channel = np.asarray(channel)[spec_sel]
         spec_time_villain = spec_time[  [i for i in range(len(spec_time)) if spec_channel[i] in bot_channels]  ]
-        score[i] = np.sum(np.random.randint(points_lower,1+points_upper,N_msg(spec_time))) + FedBot_extra*N_msg(spec_time_villain)
+        score[i] = np.sum( np.random.randint(points_lower,1+points_upper,N_msg(spec_time)) ) + FedBot_extra*N_msg(spec_time_villain)
         end_time.append(spec_time[-1])
     
     df = pd.DataFrame({ "User_ID":users , "score":score , "last_msg":end_time })
