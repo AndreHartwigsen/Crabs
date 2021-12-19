@@ -463,7 +463,7 @@ if "levels" not in locals():
     try:
         levels = import_score()
     except:
-        if "SavedScore.csv" in os.listdir("./Fed Data/"):
+        if "SavedScore.csv" in os.listdir("./FedData/"):
             levels = import_score()
         else:
             reset_score()
