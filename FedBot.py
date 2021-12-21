@@ -146,7 +146,7 @@ async def on_ready():
     if "restart_channel.csv" in os.listdir():
         if len(list(pd.read_csv("restart_channel.csv")['value']))>0:
             await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Hi I'm back 🔥🤝😈")
-            await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Fuck you <@!252070848800882688> and <@!190897913314934784>",allowed_mentions=discord.AllowedMentions(users=mention_users),delete_after=2)
+            #await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Fuck you <@!252070848800882688> and <@!190897913314934784>",allowed_mentions=discord.AllowedMentions(users=mention_users),delete_after=2)
     df = pd.DataFrame({"value":[]})
     df.to_csv("restart_channel.csv")
 
@@ -501,7 +501,10 @@ def score_update(message,LOC = "./FedData/"):
         levels['IDs'].append(ID)
         levels['score'].append(np.random.randint(points_lower,1+points_upper) + mpier)
         levels['time'].append(dt)
-
+        
+    df = pd.DataFrame({ "User_ID":levels['IDs'] , "score":levels['score'] , "last_msg":levels['time'] })
+    df.to_csv(LOC+"SavedScore.csv",index=False)    
+    
     filename = 'LoggedText%i.csv'%(channel)
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     if filename in files:
