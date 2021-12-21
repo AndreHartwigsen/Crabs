@@ -151,6 +151,7 @@ async def on_ready():
     df.to_csv("restart_channel.csv")
 
 def invalid_user_fix(txt,guild_id):
+    txt.replace('<@','<@!').replace('!!','!')
     ff = "<@!"
     if ff not in txt:
         return txt
@@ -231,7 +232,7 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
 text_model = MarkovModel2()
 
 sentences = []
-def fill_markov_library(N=5000,length=250):
+def fill_markov_library(N=10000,length=250):
     while len(sentences)<N:
         sentences.append(text_model.make_short_sentence(length))
 
@@ -559,9 +560,9 @@ async def get_banner(ID):
 async def on_message(message):
     if score_update(message):
         if message.guild.id == 466791064175509516:
-            await client.get_channel(803014667856904242).send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+            await client.get_channel(803014667856904242).send(  f"{message.author.mention} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
         else:
-            await message.channel.send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i" % int(lvl(levels['score'][levels['IDs'].index(message.author.id)])) )
+            await message.channel.send(  f"{message.author.mention} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
         
         
 
