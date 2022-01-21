@@ -39,6 +39,13 @@ def Calculator(string):
             return result['a']
     except:
         return 'Invalid syntax'
+    
+def unique(lst):
+    ret = []
+    for s in lst:
+        if s not in ret:
+            ret.append(s)
+    return ret
 
 # def current_stream(hour =int(time.strftime('%H',time.gmtime())) ): #for raid parties
 #     streams = ['therealgpf','thesweedrunner','elxrdj','cptn_jaxx','ditz33']
@@ -240,18 +247,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
                        ):
     t_start = time.time()
-    def unique(lst):
-        ret = []
-        for s in lst:
-            if s not in ret:
-                ret.append(s)
-        return ret
 
     global sentences
     if question == None:
         return text_model.make_short_sentence(length)
     else:
-        if len(sentences)<5000:
+        if len(sentences)<10000:
             for i in range(Nattempt):
                 sentences.append(text_model.make_short_sentence(length))
             sentences = unique(sentences)
@@ -563,9 +564,9 @@ async def get_banner(ID):
 async def on_message(message):
     if score_update(message):
         if message.guild.id == 466791064175509516:
-            await client.get_channel(803014667856904242).send(  f"{message.author.mention} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
+            await client.get_channel(803014667856904242).send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
         else:
-            await message.channel.send(  f"{message.author.mention} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
+            await message.channel.send(  f"{message.author.name} just gained a Fedbot level! \nThey are now level %i and rank #%i." % (int(lvl(levels['score'][levels['IDs'].index(message.author.id)])),rank_score(message.author.id)) )
         
         
 
