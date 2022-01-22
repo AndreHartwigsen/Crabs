@@ -84,7 +84,7 @@ import random
 def rotate(l, n):
     return l[n:] + l[:n]
 orders = [[0]]*2
-for i in range(298):
+for i in range(1000):
     orders.append(list(np.arange(i+2)))
     random.shuffle(orders[i+2])
 
@@ -121,6 +121,20 @@ def wave(string,amplitude = 100,Nstop= 5):
         end = total[::-1].index('\n')+1
         total = total[:-end]
     return total
+
+def EightBall():
+    ball8_choices = ["It is certain",
+                     "Outlook good",
+                     "You may rely on it",
+                     "Ask again later",
+                     "Cope and ask again",
+                     "Calculation hazy, seethe and try again",
+                     "My reply is no",
+                     "My fed prediction algorithm™️ says no",
+                     "The fed logs™️ are not in your favour"
+                     ]
+    return np.random.choice(ball8_choices)
+
 
 
 
@@ -239,9 +253,15 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
 text_model = MarkovModel2()
 
 sentences = []
-def fill_markov_library(N=10000,length=250):
+async def fill_markov_library(N=15000,length=250):
     while len(sentences)<N:
         sentences.append(text_model.make_short_sentence(length))
+async def refill_markov_library(N=15000,length=250):
+    for i in range(len(sentences)):
+        sentences[i] = text_model.make_short_sentence(length)
+    if len(sentences)<N:
+        while len(sentences)<N:
+            sentences.append(text_model.make_short_sentence(length))
 
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
@@ -292,27 +312,37 @@ markov_block_channels = [863028160795115583,768894166037823510,67796785087040719
 spam_commands = ['ftrigger'
                  ,"wave [content]"
                  ,"shitpost"
+                 ,"8ball [?]"
                  ]
 spam_desc     = ["Make the Fedbot say something"
                  ,"Create an exponentially decaying squared sinusoidal wave of [content]. (Only works with Crabs and default emojis and any message)"
-                 ,"A shitpost"
+                 ,"A shitpost."
+                 ,"Ask the fedbot a question [?] and get an answer."
                  ]
 #-----------------------------------------------------------------------
 utility_commands = ["fbactivity [ID] N"
+                    ,"ftrigger"
                     ,"fbrank"
+                    ,"fbranks"
                     ,"?live/!live"
                     ]
-utility_desc    = ["Brings up barchart wit N bars of user ID"
-                   ,"Get information about your Fedbot rank"
-                   ,"Check if a twitch user is online"
+utility_desc    = ["Brings up barchart wit N bars of user ID."
+                   ,"Make markov say something. ALT: vtrigger/mtrigger."
+                   ,"Get information about your Fedbot rank."
+                   ,"See the top 10 crabs with most xp."
+                   ,"Check if a twitch user is online."
                    ]
 
 #-----------------------------------------------------------------------
 admin_commands = ["Percentage [num]"
                     ,"fbspam"
+                    ,"Toggle mentions"
+                    ,"send score"
                     ]
-admin_desc = ['Percentage trigger chance for Fedbot [0-100]'
+admin_desc = ['Percentage trigger chance for Fedbot [0-100].'
                 ,"Toggle the spam commands."
+                ,"Toggle if the bot tags people when he mentions them."
+                ,"Sends the score sheet for all users."
                 ]
 #-----------------------------------------------------------------------
 def string_gen(commands,desc):
@@ -332,7 +362,6 @@ N_requirement = 3
 Fredag_post = False
 
 T0 = [0]
-T_dink = [0]
 Trusted_IDs = list(np.loadtxt('Trusted_IDs.txt',np.int64)) ; Temp_Trusted = []
 repeat_block_channels = [863028160795115583,768894166037823510,677967850870407198,623624161775845381,505817783745904650,466800234735992838,760010140991881216,466794303725764612,466794129838571541,466799206456360980]
 blacklist = []
@@ -342,13 +371,9 @@ blacklist = []
 
 
 #auto removal after set amount of time (time tracker)
-
-
-
-
 timer_IDs = {}
 timer_times = {}
-def countdown_timer(ID,counter='hey',cooldown = 6*60**2): #Check if user said Hi to Villin within cooldown time (cooldown in seconds)
+def countdown_timer(ID,counter='hey',cooldown = 6*60**2): #Check if user said Hi to the bot within cooldown time (cooldown in seconds)
     if counter not in timer_IDs:
         timer_IDs[counter] = []
         timer_times[counter] = []
@@ -378,7 +403,7 @@ def countdown_timer_left(ID,counter='hey',cooldown = 6*60**2):
 
 
 
-bc = ['shitpost','cum','help','lortepæl','fbhelp','cope','seethe','sborra']
+bc = ['shitpost','cum','help','lortepæl','fbhelp','cope','seethe','sborra',"8ball","8 ball","toggle mentions"]
 bc2 = ["engage fed mode","fbrank","fblevel","fbinfo","fbranks","fbrankings","fblevels","fbactivity"]
 def Contains_command(message):
     space_index = message.find(' ')
@@ -571,7 +596,7 @@ async def on_message(message):
         
 
     speak_permission = True
-    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post
+    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post , mention_users
 
     if message.author.id in Trusted_IDs and message.content.lower() == "reset score":
         await message.reply("Fedbot™️ resetting score.",delete_after=3)
@@ -713,10 +738,21 @@ async def on_message(message):
                     await message.reply('Percentage must be between 0 and 100',delete_after = 10)
             except:
                 await message.reply('Invalid syntax',delete_after = 10)
+                
+                
+                
         elif message.content.lower() in ["fill sentences","fill library"] and message.author.id in Trusted_IDs:
             await message.reply("Fedbot™️ library filler activated.",delete_after=3)
-            fill_markov_library()
+            await fill_markov_library()
             await message.reply("Fedbot™️ library filler finished.",delete_after=5)
+        elif message.content.lower() in ["refill sentences","refill library"] and message.author.id in Trusted_IDs:
+            await message.reply("Fedbot™️ library refiller activated.",delete_after=3)
+            refill_markov_library()
+            await message.reply("Fedbot™️ library refiller finished.",delete_after=5)
+        elif  message.content.lower()[:5] == "8ball" or message.content.lower()[:6] == "8 ball" or message.content.lower()[:9] == "eightball":
+            await message.reply(EightBall())
+            
+        
         elif message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
             await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
         elif message.reference is not None:
@@ -835,14 +871,22 @@ async def on_message(message):
             elif Fun:
                 Fun = False
                 await message.channel.send('Sperm now disabled')
+        if 'toggle mentions' == message.content.lower() and message.author.id in Trusted_IDs:
+            if not mention_users:
+                mention_users = True
+                await message.channel.send('Mentions now enabled')
+            elif mention_users:
+                mention_users = False
+                await message.channel.send('Mentions now disabled')
+        
         if 'bbspam' in message.content.lower()[:6] and message.author.id not in Trusted_IDs:
             await message.channel.send(f'{message.author.mention}. Only LeCerial and Truxa have the right to touch sperm. 👀')
             
         if Fun:
-            if 'cope' == message.content.lower() or 'seethe' == message.content.lower() or 'prolapse' == message.content.lower():
+            if message.content.lower() in ['seethe','cope','prolapse','have sex','dilate','mald','stay mad',"didn't ask"]:
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cope/%s' % Link_selector([s for s in os.listdir("./images/cope/") if '.ini' not in s])))
-            if 'bbcum' == message.content.lower()  or 'cum' == message.content.lower() or 'sborra' == message.content.lower():
+            if 'fbcum' == message.content.lower()  or 'cum' == message.content.lower() or 'sborra' == message.content.lower():
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cum/%s' % Link_selector([s for s in os.listdir("./images/cum/") if '.ini' not in s])) )        
             if 'fbshitpost' == message.content.lower()[:10]  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
