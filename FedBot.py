@@ -267,7 +267,7 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
                        ):
     t_start = time.time()
-
+    length = np.random.randint(50,length)
     global sentences
     if question == None:
         return text_model.make_short_sentence(length)
@@ -747,7 +747,7 @@ async def on_message(message):
             await message.reply("Fedbot™️ library filler finished.",delete_after=5)
         elif message.content.lower() in ["refill sentences","refill library"] and message.author.id in Trusted_IDs:
             await message.reply("Fedbot™️ library refiller activated.",delete_after=3)
-            refill_markov_library()
+            await refill_markov_library()
             await message.reply("Fedbot™️ library refiller finished.",delete_after=5)
         elif  message.content.lower()[:5] == "8ball" or message.content.lower()[:6] == "8 ball" or message.content.lower()[:9] == "eightball":
             await message.reply(EightBall())
