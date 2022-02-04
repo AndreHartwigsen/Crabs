@@ -12,7 +12,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 nest_asyncio.apply()
 
-
+spotify = np.loadtxt("Spotify.txt",dtype=str)
 
 #https://github.com/jsvine/markovify
 def list_creator(names):
@@ -123,15 +123,16 @@ def wave(string,amplitude = 100,Nstop= 5):
     return total
 
 def EightBall():
-    ball8_choices = ["It is certain",
-                     "Outlook good",
-                     "You may rely on it",
-                     "Ask again later",
-                     "Cope and ask again",
-                     "Calculation hazy, seethe and try again",
-                     "My reply is no",
-                     "My fed prediction algorithm™️ says no",
-                     "The fed logs™️ are not in your favour"
+    ball8_choices = ["It is certain.",
+                     "Outlook good.",
+                     "You may rely on it.",
+                     "Ask again later.",
+                     "Cope and ask again.",
+                     "Calculation hazy, seethe and try again.",
+                     "My reply is no.",
+                     "My fed prediction algorithm™️ says no.",
+                     "The fed logs™️ are not in your favour.",
+                     "My younger cousin is a retard, therefore no."
                      ]
     return np.random.choice(ball8_choices)
 
@@ -882,7 +883,11 @@ async def on_message(message):
         if 'bbspam' in message.content.lower()[:6] and message.author.id not in Trusted_IDs:
             await message.channel.send(f'{message.author.mention}. Only LeCerial and Truxa have the right to touch sperm. 👀')
             
-        if Fun:
+        if Fun: 
+            if contained_in_list(message.content.lower(),["cereal music","cerial music","ceriel music","andre music","danish music","dane music"]):
+                if countdown_timer(message.author.id,'cerial music',5*60):
+                    await message.channel.trigger_typing()
+                    await message.channel.send(str(Link_selector(spotify)))
             if message.content.lower() in ['seethe','cope','prolapse','have sex','dilate','mald','stay mad',"didn't ask"]:
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cope/%s' % Link_selector([s for s in os.listdir("./images/cope/") if '.ini' not in s])))
