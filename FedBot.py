@@ -885,7 +885,7 @@ async def on_message(message):
             
         if Fun: 
             if contained_in_list(message.content.lower(),["cereal music","cerial music","ceriel music","andre music","danish music","dane music"]):
-                if countdown_timer(message.author.id,'cerial music',5*60):
+                if countdown_timer(message.author.id,'cerial music',5*60) or message.author.id in Trusted_IDs:
                     await message.channel.trigger_typing()
                     await message.channel.send(str(Link_selector(spotify)))
             if message.content.lower() in ['seethe','cope','prolapse','have sex','dilate','mald','stay mad',"didn't ask"]:
