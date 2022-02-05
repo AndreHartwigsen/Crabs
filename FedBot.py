@@ -224,8 +224,38 @@ def your_mom_joke():
     text = np.delete(text,removal)
     return str(text[np.random.randint(len(text))])
 
-
-
+def is_emoji_msg(msg):
+    msg = str(msg)
+    if "<" in msg and ">" in msg and ":" in msg:
+        split = msg.split()
+        n = 0
+        for s in split:
+            if s[0] == "<" and s[-1] == ">":
+                n += 1
+        if len(split) == n:
+            return True
+        else:
+            return False
+    else:
+        return False
+def emoji_fix(msg):
+    msg = [s for s in msg if str(s) != "nan"]
+    msg2 = []
+    i = 0
+    while i < len(msg)-2:
+        if is_emoji_msg(msg[i]):
+            i += 1
+        else:
+            msg2.append(msg[i])
+            i2 = 1
+            if is_emoji_msg(msg[i+i2]):
+                while is_emoji_msg(msg[i+i2]):
+                    msg2[-1] = msg2[-1] + " " + msg[i+i2]
+                    i2 += 1
+                i += i2
+            else:
+                i += 1
+    return msg2
 
 
 def MarkovModel2(directory='./MarkovSource/',Text_only = False):
@@ -238,13 +268,13 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
                 out.append(remainder[:index])
             remainder = remainder[index+1:]
         return out
-    files = os.listdir(directory)
+    files = [directory+s for s in os.listdir(directory) if "Logged" not in s]+['./FedData/'+s for s in os.listdir('./FedData/') if "Logged" in s]
     text = []
     for s in files:
         if 'Logged' in s:
-            text = text + [str(s1) for s1 in list(pd.read_csv(directory+s)['message'])]
-        elif 'joke' not in s:
-            with open(directory+s, encoding="utf8") as f:
+            text = text + [str(s1) for s1 in emoji_fix(list(pd.read_csv(s)['message']))]
+        else:#elif 'joke' not in s:
+            with open(s, encoding="utf8") as f:
                 text = text + NewLineLister(f.read())
                 #text.append( f.read() )
     if Text_only:
@@ -254,10 +284,10 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
 text_model = MarkovModel2()
 
 sentences = []
-async def fill_markov_library(N=15000,length=250):
+async def fill_markov_library(N=10000,length=250):
     while len(sentences)<N:
         sentences.append(text_model.make_short_sentence(length))
-async def refill_markov_library(N=15000,length=250):
+async def refill_markov_library(N=10000,length=250):
     for i in range(len(sentences)):
         sentences[i] = text_model.make_short_sentence(length)
     if len(sentences)<N:
@@ -886,6 +916,10 @@ async def on_message(message):
         if Fun: 
             if contained_in_list(message.content.lower(),["cereal music","cerial music","ceriel music","andre music","danish music","dane music"]):
                 if countdown_timer(message.author.id,'cerial music',5*60) or message.author.id in Trusted_IDs:
+                    await message.channel.trigger_typing()
+                    await message.reply("np bro, i got you")
+                    await message.channel.trigger_typing()
+                    await message.channel.send("<:goolsburdo:850075797758017547>")
                     await message.channel.trigger_typing()
                     await message.channel.send(str(Link_selector(spotify)))
             if message.content.lower() in ['seethe','cope','prolapse','have sex','dilate','mald','stay mad',"didn't ask"]:
