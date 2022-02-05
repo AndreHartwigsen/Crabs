@@ -256,7 +256,41 @@ def emoji_fix(msg):
             else:
                 i += 1
     return msg2
-
+def emoji_splitter(msg1):
+    msg = str(msg1).split()
+    p1 = []
+    p2 = []
+    p3 = []
+    i = 0
+    score = [1 if is_emoji_msg(s) else 0 for s in msg]
+    if len(unique(score)) == 1:
+        return None,msg1,None
+    else:
+        if score[0] == 1 and score[-1] == 1:
+            i = 0
+            while score[i] == 1:
+                p1.append(msg[i])
+                i+=1
+            i2 = -1
+            while score[i2] == 1:
+                p3.append(msg[i2])
+                i2 += -1
+            p2 = msg[i+1:i2+1]
+            return " ".join(p1)," ".join(p2)," ".join(p3)
+        elif score[0] == 1:
+            i = 0
+            while score[i] == 1:
+                p1.append(msg[i])
+                i += 1
+            p2 = msg[i+1:]
+            return " ".join(p1)," ".join(p2),None
+        elif score[-1] == 1:
+            i2 = -1
+            while score[i2] == 1:
+                p3.append(msg[i2])
+                i2 += -1
+            p2 = msg[:i2+1]
+            return None," ".join(p2)," ".join(p3)
 
 def MarkovModel2(directory='./MarkovSource/',Text_only = False):
     def NewLineLister(string):
@@ -785,7 +819,17 @@ async def on_message(message):
             
         
         elif message.content.lower() in ['ftrigger','mtrigger',"vtrigger"]:
-            await message.channel.send(Generate_sentence(100,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
+            generate = Generate_sentence(100,server_id=message.guild.id)
+            p1,p2,p3 = emoji_splitter(str(generate))
+            if p1 != None:
+                await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            if p3 != None:
+                await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
+        
+        
+        
+        
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
             if messg.author == client.user:
@@ -794,14 +838,32 @@ async def on_message(message):
                     await asyncio.sleep(4)
                     await message.channel.send(your_mom_joke())
                 else:
-                    await message.reply(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
+                    generate = Generate_sentence(100,message.content,server_id=message.guild.id)
+                    p1,p2,p3 = emoji_splitter(str(generate))
+                    if p1 != None:
+                        await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                    await message.reply(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                    if p3 != None:
+                        await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                    
+                    
+                    
+                    
         elif client.user in message.mentions or 'fedbot' in message.content.lower() or "fed bot" in message.content.lower() or "markov" in message.content.lower():
             await message.channel.trigger_typing()
             if mom_mention(message.content.lower()):
                 await asyncio.sleep(4)
                 await message.channel.send(your_mom_joke())
             else:
-                await message.channel.send(Generate_sentence(100,message.content,server_id=message.guild.id),allowed_mentions=discord.AllowedMentions(users=mention_users))
+                generate = Generate_sentence(100,message.content,server_id=message.guild.id)
+                p1,p2,p3 = emoji_splitter(str(generate))
+                if p1 != None:
+                    await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                if p3 != None:
+                    await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
+        
+        
         elif message.author != client.user:
             if message.channel.id not in bot_channels:
                 mark_msg = Generate_sentence(markov_chance_percentage,server_id=message.guild.id)
@@ -809,7 +871,12 @@ async def on_message(message):
                 temp_percentage_chance = markov_chance_percentage + 10 if (markov_chance_percentage + 10)<=100 else 100
                 mark_msg = Generate_sentence(temp_percentage_chance,server_id=message.guild.id)
             if mark_msg != None:
-                await message.channel.send(mark_msg,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                p1,p2,p3 = emoji_splitter(str(mark_msg))
+                if p1 != None:
+                    await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+                if p3 != None:
+                    await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
     
     if message.author.id in Trusted_IDs and 'fed mode' in message.content.lower():   
         async def Logger(limit=None,channel_id=message.channel.id,skipper = "http",LOC = "./MarkovSource/"):
