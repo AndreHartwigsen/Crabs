@@ -228,6 +228,8 @@ def your_mom_joke():
     text = np.delete(text,removal)
     return str(text[np.random.randint(len(text))])
 
+import emoji
+default_emojis = emoji.UNICODE_EMOJI['en']
 def is_emoji_msg(msg):
     msg = str(msg)
     if "<" in msg and ">" in msg and ":" in msg:
@@ -240,12 +242,14 @@ def is_emoji_msg(msg):
             return True
         else:
             return False
+    elif np.sum([s in default_emojis for s in msg.split()]) == len(msg.split()):
+        return True
     else:
         return False
 def invalid_emoji_fix(msg):
     spl = str(msg).split()
     for i in range(len(spl)):
-        if spl[i] not in emojis:
+        if spl[i] not in emojis and spl[i] not in default_emojis:
             emo = np.random.choice(emojis)
             spl[i] = "<%s:%s:%i>" % ("a" if emo.animated else "",emo.name,emo.id)
     return " ".join(spl)
