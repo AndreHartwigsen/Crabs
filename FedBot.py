@@ -152,19 +152,23 @@ client = discord.Client(intents=intents)
 async def on_ready():
     def guild_getter():
         guild_members = []
+        emojis = []
         guild_ids = [guild.id for guild in client.guilds]
         for ig in range(len(guild_ids)):
             guild = client.get_guild(guild_ids[ig])
             temp = []
             for member in guild.members:
                 temp.append(member.id)
+            for emo in guild.emojis:
+                emojis.append(emo)
             guild_members.append(temp)
-        return guild_members,guild_ids
-    global guild_members , guild_ids
-    guild_members,guild_ids = guild_getter()
+        return guild_members,guild_ids,emojis
+    global guild_members , guild_ids , emojis
+    guild_members,guild_ids,emojis = guild_getter()
     print(f"Logged in as {client.user}")
     print("Guild IDs",guild_ids)
     print("Guild member counts",[len(guild_members[i]) for i in range(len(guild_members))])
+    print(emojis[:2])
     if "restart_channel.csv" in os.listdir():
         if len(list(pd.read_csv("restart_channel.csv")['value']))>0:
             await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Hi I'm back 🔥🤝😈")
@@ -238,6 +242,13 @@ def is_emoji_msg(msg):
             return False
     else:
         return False
+def invalid_emoji_fix(msg):
+    spl = str(msg).split()
+    for i in range(len(spl)):
+        if spl[i] not in emojis:
+            emo = np.random.choice(emojis)
+            spl[i] = "<%s:%s:%i>" % ("a" if emo.animated else "",emo.name,emo.id)
+    return " ".join(spl)
 def emoji_fix(msg):
     msg = [s for s in msg if str(s) != "nan"]
     msg2 = []
@@ -276,21 +287,21 @@ def emoji_splitter(msg1):
                 p3.append(msg[i2])
                 i2 += -1
             p2 = msg[i+1:i2+1]
-            return " ".join(p1)," ".join(p2)," ".join(p3)
+            return invalid_emoji_fix(" ".join(p1))," ".join(p2),invalid_emoji_fix(" ".join(p3))
         elif score[0] == 1:
             i = 0
             while score[i] == 1:
                 p1.append(msg[i])
                 i += 1
             p2 = msg[i+1:]
-            return " ".join(p1)," ".join(p2),None
+            return invalid_emoji_fix(" ".join(p1))," ".join(p2),None
         elif score[-1] == 1:
             i2 = -1
             while score[i2] == 1:
                 p3.append(msg[i2])
                 i2 += -1
             p2 = msg[:i2+1]
-            return None," ".join(p2)," ".join(p3)
+            return None," ".join(p2),invalid_emoji_fix(" ".join(p3))
 
 def MarkovModel2(directory='./MarkovSource/',Text_only = False):
     def NewLineLister(string):
