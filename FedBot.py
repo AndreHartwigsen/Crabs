@@ -168,7 +168,7 @@ async def on_ready():
     print(f"Logged in as {client.user}")
     print("Guild IDs",guild_ids)
     print("Guild member counts",[len(guild_members[i]) for i in range(len(guild_members))])
-    print(emojis[:2])
+    print(len(emojis),emojis[:2])
     if "restart_channel.csv" in os.listdir():
         if len(list(pd.read_csv("restart_channel.csv")['value']))>0:
             await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Hi I'm back 🔥🤝😈")
@@ -232,20 +232,14 @@ import emoji
 default_emojis = emoji.UNICODE_EMOJI['en']
 def is_emoji_msg(msg):
     msg = str(msg)
-    if "<" in msg and ">" in msg and ":" in msg:
-        split = msg.split()
-        n = 0
-        for s in split:
-            if s[0] == "<" and s[-1] == ">":
-                n += 1
-        if len(split) == n:
-            return True
-        else:
-            return False
-    elif np.sum([s in default_emojis for s in msg.split()]) == len(msg.split()):
-        return True
-    else:
-        return False
+    
+    score = 0
+    for s in msg.split():
+        if s in default_emojis or ("<" in s and ">" in s and ":" in s):
+            score+= 1
+    return True if len(msg.split()) == score else False
+    
+
 def invalid_emoji_fix(msg):
     spl = str(msg).split()
     for i in range(len(spl)):
@@ -343,9 +337,10 @@ async def refill_markov_library(N=10000,length=250):
         while len(sentences)<N:
             sentences.append(text_model.make_short_sentence(length))
 
+
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
-                       ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
-                       ):
+                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
+                        ):
     t_start = time.time()
     length = np.random.randint(50,length)
     global sentences
@@ -375,6 +370,16 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             time.sleep(3)
             return returner
 
+def cont_sentence(msg,server_id=466791064175509516,tries=150):
+    starter = msg.split()[-1]
+    try:
+        out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
+        while out == None:
+            out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
+        return invalid_user_fix(" ".join(msg.split()[1:] + out.split()[1:]),server_id)
+    except:
+        out = Sentence_relevance(msg)
+        return invalid_user_fix(out,server_id)
 
 markov_chance_percentage = 0
 
@@ -843,7 +848,14 @@ async def on_message(message):
                 await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
         
-        
+        elif message.content.lower()[:5] == "mcont" or message.content.lower()[:9] == "mcontinue":
+            generate = cont_sentence(message.content,server_id=message.guild.id)
+            p1,p2,p3 = emoji_splitter(str(generate))
+            if p1 != None:
+                await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            if p3 != None:
+                await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
