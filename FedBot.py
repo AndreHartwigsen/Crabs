@@ -770,13 +770,14 @@ async def on_message(message):
             col[2] = 'darkorange'
          
             arr = arr1[isave]
+            arr[:,3] = arr[:,3]+0.5*np.max(arr[:,3])
 
             plt.figure(figsize=(6,4))
             ax = plt.subplot(111)
             ax.bar(np.arange(len(arr))+1,arr[:,3],color=col)
             plt.tight_layout()
             for i, (name, height) in enumerate(zip(names, arr[:,3])):
-                ax.text(i+1, height, ' ' + name, color='seashell',
+                ax.text(i+1, height, ' ' + name, color='black',
                         ha='center', va='top', rotation=-90, fontsize=15)
             plt.xticks(np.arange(len(arr))+1)
             plt.axis('off')
