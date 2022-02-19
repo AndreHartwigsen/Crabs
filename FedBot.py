@@ -636,6 +636,8 @@ def rank_score(ID):
     arr0[:,3] = lvl(level)
     
     arr = arr0[np.argsort(arr0[:,0])][::-1]
+    sel = [i for i in range(len(arr[:,2])) if arr[:,2][i] in [item for sublist in guild_members for item in sublist]]
+    arr = arr[sel]
     return list(arr[:,2]).index(ID)+1
 def activity(ID,N=100,LOC = "./FedData/"):
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
@@ -701,20 +703,31 @@ async def on_message(message):
     
     
     if message.author != client.user and message.channel.id not in repeat_block_channels:
-        if message.content.lower() in ["fbrank","fblevel","fbinfo"]:
-            level,xp_low,xp_up,remaining = lvl(levels['score'][levels['IDs'].index(message.author.id)],info=True)
+        if message.content.lower().split()[0] in ["fbrank","fblevel","fbinfo"]:
+            search_ID = message.author.id 
+            if len(message.content.lower().split())>1:
+                try:
+                    search_ID = int(message.content.split()[1])
+                except:
+                    try:
+                        search_ID = message.mentions[0].id
+                    except:
+                        None
+                
+            level,xp_low,xp_up,remaining = lvl(levels['score'][levels['IDs'].index(search_ID)],info=True)
             Nmarks = 35
             percentage_score = int(np.floor(Nmarks*remaining/(xp_up-xp_low) ))
-            banner = await get_banner(message.author.id)
-            embed = discord.Embed(colour = message.author.top_role.colour)
-            embed.set_author(name=message.author.nick,icon_url=message.author.avatar_url)
+            banner = await get_banner(search_ID)
+            messageauthor = message.guild.get_member(search_ID)
+            embed = discord.Embed(colour = messageauthor.top_role.colour)
+            embed.set_author(name=messageauthor.nick,icon_url=messageauthor.avatar_url)
             lst1 = ["Acoount created","Server joined","Top role","Current status"]
-            lst2 = [str(message.author.created_at)[:10],str(message.author.joined_at)[:10],message.author.top_role.name,str(message.author.activity)]
+            lst2 = [str(messageauthor.created_at)[:10],str(messageauthor.joined_at)[:10],messageauthor.top_role.name,str(messageauthor.activity)]
             embed.add_field(name="User info"  , value=''.join(string_gen(lst1[:2],lst2[:2]))  ,inline=True)
             embed.add_field(name="Server info", value=''.join(string_gen(lst1[2:],lst2[2:]))  ,inline=True)
-            embed.add_field(name="Fedbot level: %i\nFedbot rank: %i"% (level,rank_score(message.author.id)), 
+            embed.add_field(name="Fedbot level: %i\nFedbot rank: %i"% (level,rank_score(search_ID)), 
                             value="XP: %i `[%s%s]` %i\nCurrent amount of XP: %i\nXP needed for next level: %i"
-                            %( xp_low,"#"*(Nmarks-percentage_score),"-"*percentage_score,xp_up,levels['score'][levels['IDs'].index(message.author.id)],remaining ),inline=False)
+                            %( xp_low,"#"*(Nmarks-percentage_score),"-"*percentage_score,xp_up,levels['score'][levels['IDs'].index(search_ID)],remaining ),inline=False)
             if banner != None:
                 embed.set_thumbnail(url=banner)
             await message.channel.send(embed=embed)
