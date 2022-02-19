@@ -146,6 +146,14 @@ import asyncio
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
+from discord.ext import commands
+
+bot = commands.Bot(command_prefix='$')
+
+@commands.command()
+async def test(ctx,arg):
+    await ctx.send(arg)
+bot.add_command(test)
 
 
 @client.event  # event decorator/wrapper
@@ -168,7 +176,7 @@ async def on_ready():
     print(f"Logged in as {client.user}")
     print("Guild IDs",guild_ids)
     print("Guild member counts",[len(guild_members[i]) for i in range(len(guild_members))])
-    print(len(emojis),emojis[:2])
+    print(emojis[:2])
     if "restart_channel.csv" in os.listdir():
         if len(list(pd.read_csv("restart_channel.csv")['value']))>0:
             await client.get_channel(list(pd.read_csv("restart_channel.csv")['value'])[0]).send("Hi I'm back 🔥🤝😈")
@@ -232,14 +240,20 @@ import emoji
 default_emojis = emoji.UNICODE_EMOJI['en']
 def is_emoji_msg(msg):
     msg = str(msg)
-    
-    score = 0
-    for s in msg.split():
-        if s in default_emojis or ("<" in s and ">" in s and ":" in s):
-            score+= 1
-    return True if len(msg.split()) == score else False
-    
-
+    if "<" in msg and ">" in msg and ":" in msg:
+        split = msg.split()
+        n = 0
+        for s in split:
+            if s[0] == "<" and s[-1] == ">":
+                n += 1
+        if len(split) == n:
+            return True
+        else:
+            return False
+    elif np.sum([s in default_emojis for s in msg.split()]) == len(msg.split()):
+        return True
+    else:
+        return False
 def invalid_emoji_fix(msg):
     spl = str(msg).split()
     for i in range(len(spl)):
@@ -337,10 +351,9 @@ async def refill_markov_library(N=10000,length=250):
         while len(sentences)<N:
             sentences.append(text_model.make_short_sentence(length))
 
-
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
-                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
-                        ):
+                       ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
+                       ):
     t_start = time.time()
     length = np.random.randint(50,length)
     global sentences
@@ -370,16 +383,6 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             time.sleep(3)
             return returner
 
-def cont_sentence(msg,server_id=466791064175509516,tries=150):
-    starter = msg.split()[-1]
-    try:
-        out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
-        while out == None:
-            out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
-        return invalid_user_fix(" ".join(msg.split()[1:] + out.split()[1:]),server_id)
-    except:
-        out = Sentence_relevance(msg)
-        return invalid_user_fix(out,server_id)
 
 markov_chance_percentage = 0
 
@@ -726,21 +729,38 @@ async def on_message(message):
             arr0[:,2] = levels['IDs']
             arr0[:,3] = lvl(level)
             
-            arr = arr0[np.argsort(arr0[:,0])][::-1][:10]
+            arr1 = arr0[np.argsort(arr0[:,0])][::-1]#[:10]
             
             
             
             names = []
+            
             if "fed_skip" in globals():
-                for Id in arr[:,2]:
-                    try:
-                        user = await client.fetch_user(Id)
-                        names.append(str(user.name))
-                    except:
-                        names.append(str(Id))
+                iId = 0
+                isave = []
+                while len(names)<10:
+                    Id = arr1[iId,2]
+                    if Id in [item for sublist in guild_members for item in sublist]:
+                        try:
+                            user = await client.fetch_user(Id)
+                            names.append(str(user.name))
+                        except:
+                            names.append(str(Id))
+                        isave.append(iId)
+                    if iId<len(arr1[:,2])-1:
+                        iId += 1
+                    else:
+                        names.append('None')
+                
+                # for Id in arr[:,2]:
+                #     try:
+                #         user = await client.fetch_user(Id)
+                #         names.append(str(user.name))
+                #     except:
+                #         names.append(str(Id))
                     
             else:
-                for i in range(len(arr)):
+                for i in range(len(arr1)):
                     names.append("Placeholder. %i"% (i+1))
             
             
@@ -748,8 +768,9 @@ async def on_message(message):
             col[0] = 'gold'
             col[1] = 'silver'
             col[2] = 'darkorange'
+         
+            arr = arr1[isave]
 
-            
             plt.figure(figsize=(6,4))
             ax = plt.subplot(111)
             ax.bar(np.arange(len(arr))+1,arr[:,3],color=col)
@@ -848,14 +869,7 @@ async def on_message(message):
                 await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
         
-        elif message.content.lower()[:5] == "mcont" or message.content.lower()[:9] == "mcontinue":
-            generate = cont_sentence(message.content,server_id=message.guild.id)
-            p1,p2,p3 = emoji_splitter(str(generate))
-            if p1 != None:
-                await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
-            await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
-            if p3 != None:
-                await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
+        
         
         elif message.reference is not None:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
