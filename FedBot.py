@@ -383,6 +383,16 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             time.sleep(3)
             return returner
 
+def cont_sentence(msg,server_id=466791064175509516,tries=150):
+    starter = msg.split()[-1]
+    try:
+        out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
+        while out == None:
+            out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
+        return invalid_user_fix(" ".join(msg.split()[1:] + out.split()[1:]),server_id)
+    except:
+        out = Sentence_relevance(msg)
+        return invalid_user_fix(out,server_id)
 
 markov_chance_percentage = 0
 
@@ -401,11 +411,13 @@ spam_commands = ['ftrigger'
                  ,"wave [content]"
                  ,"shitpost"
                  ,"8ball [?]"
+                 ,"mcont [sentence]"
                  ]
 spam_desc     = ["Make the Fedbot say something"
                  ,"Create an exponentially decaying squared sinusoidal wave of [content]. (Only works with Crabs and default emojis and any message)"
                  ,"A shitpost."
                  ,"Ask the fedbot a question [?] and get an answer."
+                 ,"Make markov continue [sentence]."
                  ]
 #-----------------------------------------------------------------------
 utility_commands = ["fbactivity [ID] N"
@@ -882,7 +894,14 @@ async def on_message(message):
             if p3 != None:
                 await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
-        
+        elif message.content.lower()[:5] == "mcont" or message.content.lower()[:9] == "mcontinue":
+            generate = cont_sentence(message.content,server_id=message.guild.id)
+            p1,p2,p3 = emoji_splitter(str(generate))
+            if p1 != None:
+                await message.channel.send(p1,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            if p3 != None:
+                await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
         
         elif message.reference is not None:
