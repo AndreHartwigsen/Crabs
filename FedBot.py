@@ -1000,15 +1000,22 @@ async def on_message(message):
                 i+=1
                 if len(d.content)>0: 
                     if skipper == None or skipper not in d.content:
-                        messages.append(d.content)
+                        messages.append(d.content + " " + d.attachments[0].url if len(d.attachments)>0 else "")
                         author.append(d.author.name)
                         date.append(d.id)
                         id_author.append(d.author.id)
                         datetime.append(d.created_at)
-                        if i%(5000 if limit == None else limit//5) == 0:
-                            TN = time.time()
-                            TD = TN - T0
-                            print('%i done at %i per sec' % (i,i/TD))
+                if len(d.attachments)>0 and len(d.content) == 0:
+                    if skipper == None or skipper not in d.content:
+                        messages.append(d.attachments[0].url)
+                        author.append(d.author.name)
+                        date.append(d.id)
+                        id_author.append(d.author.id)
+                        datetime.append(d.created_at)
+                if i%(5000 if limit == None else limit//5) == 0:
+                    TN = time.time()
+                    TD = TN - T0
+                    print('%i done at %i per sec' % (i,i/TD))
             TN = time.time()
             TD = TN - T0
             channel_ids = [channel_id]*len(messages)
