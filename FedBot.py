@@ -663,7 +663,8 @@ def score_update(message,LOC = "./FedData/"):
     filename = 'LoggedText%i.csv'%(channel)
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     if filename in files:
-        df = pd.DataFrame({'author':message.author.name , 'message':message.content , 'ID':ID , 'date':message.id , "datetime":timestamp , "channel":channel},index=[0])
+        df = pd.DataFrame({'author':message.author.name , 'message':message.content + [" " + message.attachments[0].url][0] if len(message.attachments)>0 else "" , 
+                           'ID':ID , 'date':message.id , "datetime":timestamp , "channel":channel},index=[0])
         dff = pd.read_csv(LOC+filename)
         dfa = pd.concat([df,dff])
         dfa.to_csv(LOC+'LoggedText%i.csv'%(channel),index=False)
