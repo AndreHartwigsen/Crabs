@@ -355,7 +355,7 @@ def giffile_finder():
     gifs = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and ".gif" in str(s)]
     videos = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and "cdn.discordapp.com" in str(s)]
     
-    return gifs+videos
+    return [s for s in gifs+videos if "media.discordapp.net" not in s]
 random_file = giffile_finder()
 sentences = []
 async def fill_markov_library(N=10000,length=250):
