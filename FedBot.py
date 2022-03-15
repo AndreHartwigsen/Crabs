@@ -339,7 +339,24 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
     else:
         return mk.NewlineText(text)
 text_model = MarkovModel2()
-
+def giffile_finder():
+    def fixxer(string):
+        s = string.split()
+        i = 0
+        while i<len(s):
+            if "http" in s[i]:
+                return s[i]
+            i += 1
+        return string
+    LOC = "./FedData/"
+    files = [s for s in os.listdir(LOC) if "LoggedText" in s]
+    master_file = pd.concat([pd.read_csv(LOC+s) for s in files])
+    messages = list(master_file['message'])
+    gifs = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and ".gif" in str(s)]
+    videos = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and "cdn.discordapp.com" in str(s)]
+    
+    return gifs+videos
+random_file = giffile_finder()
 sentences = []
 async def fill_markov_library(N=10000,length=250):
     while len(sentences)<N:
@@ -401,9 +418,21 @@ def Generate_sentence(pct=markov_chance_percentage,question=None,length = 250,se
         msg = Sentence_relevance(question=question,length=length)
         while msg == None:
             msg = Sentence_relevance(question=question,length=length)
-        return invalid_user_fix(msg,server_id)
+        return np.random.choice([invalid_user_fix(msg,server_id),np.random.choice(random_file)],p=[0.9,0.1])
     else:
         return None
+    
+
+
+
+
+
+
+
+
+
+
+
 markov_block_channels = [863028160795115583,768894166037823510,677967850870407198,623624161775845381,505817783745904650,466800234735992838,760010140991881216,466794303725764612,466794129838571541,466799206456360980]
 #-------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------
@@ -951,6 +980,10 @@ async def on_message(message):
                 await message.channel.send(p2,allowed_mentions=discord.AllowedMentions(users=mention_users))
                 if p3 != None:
                     await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
+            # else:
+            #     if np.random.rand()<temp_percentage_chance:
+            #         await message.channel.send(np.random.choice(random_file))
+            
     
     if message.author.id in Trusted_IDs and 'fed mode' in message.content.lower():   
         async def Logger(limit=None,channel_id=message.channel.id,skipper = "http",LOC = "./MarkovSource/"):
