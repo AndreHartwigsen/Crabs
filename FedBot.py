@@ -352,11 +352,14 @@ def giffile_finder():
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     master_file = pd.concat([pd.read_csv(LOC+s) for s in files])
     messages = list(master_file['message'])
+    shitpost_messages = list(master_file.loc[master_file["channel"] == 508003304777973770]["message"])
     gifs = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and ".gif" in str(s)]
     videos = [fixxer(str(s)) for i,s in enumerate(messages) if "http" in str(s) and "cdn.discordapp.com" in str(s)]
+    shitpost_gifs = [fixxer(str(s)) for i,s in enumerate(shitpost_messages) if "http" in str(s) and ".gif" in str(s)]
+    shitpost_videos = [fixxer(str(s)) for i,s in enumerate(shitpost_messages) if "http" in str(s) and "cdn.discordapp.com" in str(s)]
     
-    return [s for s in gifs+videos if "media.discordapp.net" not in s]
-random_file = giffile_finder()
+    return [s for s in gifs+videos if "media.discordapp.net" not in s],[s for s in shitpost_gifs+shitpost_videos if "media.discordapp.net" not in s]
+random_file,shitpost_random_file = giffile_finder()
 sentences = []
 async def fill_markov_library(N=10000,length=250):
     while len(sentences)<N:
@@ -418,7 +421,7 @@ def Generate_sentence(pct=markov_chance_percentage,question=None,length = 250,se
         msg = Sentence_relevance(question=question,length=length)
         while msg == None:
             msg = Sentence_relevance(question=question,length=length)
-        return np.random.choice([invalid_user_fix(msg,server_id),np.random.choice(random_file)],p=[0.9,0.1])
+        return np.random.choice([invalid_user_fix(msg,server_id),np.random.choice(random_file)],p=[0.85,0.15])
     else:
         return None
     
@@ -1116,10 +1119,16 @@ async def on_message(message):
                     await message.reply('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
                     Fredag_post = True
                 else:
-                    File_Selected = Link_selector([s for s in os.listdir("./images/shitpost/") if '.ini' not in s])
-                    while 'friday33' in File_Selected:
+                    
+                    link_or_file = np.random.choice(["Link","File"],p=[0.85,0.15])
+                    if link_or_file == "File":
                         File_Selected = Link_selector([s for s in os.listdir("./images/shitpost/") if '.ini' not in s])
-                    await message.channel.send(file=discord.File('./images/shitpost/%s' %File_Selected ) )
+                        while 'friday33' in File_Selected:
+                            File_Selected = Link_selector([s for s in os.listdir("./images/shitpost/") if '.ini' not in s])
+                        await message.channel.send(file=discord.File('./images/shitpost/%s' %File_Selected ) )
+                    else:
+                        await message.channel.send(np.random.choice(shitpost_random_file ))
+                        
                 if Fredag_post and int(time.strftime('%w',time.gmtime())) != 5:
                     Fredag_post = False
             
