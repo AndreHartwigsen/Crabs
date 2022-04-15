@@ -499,6 +499,7 @@ mention_users = True
 Fun = True
 N_requirement = 3
 Fredag_post = False
+shitpost_delete = False
 
 T0 = [0]
 Trusted_IDs = list(np.loadtxt('Trusted_IDs.txt',np.int64)) ; Temp_Trusted = []
@@ -738,7 +739,7 @@ async def on_message(message):
         
 
     speak_permission = True
-    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post , mention_users
+    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post , mention_users , shitpost_delete
 
     if message.author.id in Trusted_IDs and message.content.lower() == "reset score":
         await message.reply("Fedbot™️ resetting score.",delete_after=3)
@@ -1120,7 +1121,7 @@ async def on_message(message):
             if 'fbcum' == message.content.lower()  or 'cum' == message.content.lower() or 'sborra' == message.content.lower():
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cum/%s' % Link_selector([s for s in os.listdir("./images/cum/") if '.ini' not in s])) )        
-            if 'fbshitpost' == message.content.lower()[:10]  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
+            if 'fbshitpost' == message.content.lower()  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
                 await message.channel.trigger_typing()
                 if not Fredag_post and int(time.strftime('%w',time.gmtime())) == 5:
                     await message.channel.send('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
@@ -1135,10 +1136,20 @@ async def on_message(message):
                         await message.channel.send(file=discord.File('./images/shitpost/%s' %File_Selected ) )
                     else:
                         await message.channel.send(np.random.choice(shitpost_random_file ))
-                await message.delete()
+                if shitpost_delete:
+                    await message.delete()
                         
                 if Fredag_post and int(time.strftime('%w',time.gmtime())) != 5:
                     Fredag_post = False
+        if "toggle shitpost delete" == message.content.lower() and message.author.id in Trusted_IDs:
+            if shitpost_delete:
+                shitpost_delete = False
+                await message.reply("now no longer deleting shitpost command",delete_after=5)
+                await message.delete()
+            elif not shitpost_delete:
+                shitpost_delete = True
+                await message.reply("now deleting shitpost command",delete_after=5)
+                await message.delete()
             
             
             
