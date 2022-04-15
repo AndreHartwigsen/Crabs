@@ -1123,7 +1123,7 @@ async def on_message(message):
             if 'fbshitpost' == message.content.lower()[:10]  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
                 await message.channel.trigger_typing()
                 if not Fredag_post and int(time.strftime('%w',time.gmtime())) == 5:
-                    await message.reply('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
+                    await message.channel.send('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
                     Fredag_post = True
                 else:
                     
@@ -1135,6 +1135,7 @@ async def on_message(message):
                         await message.channel.send(file=discord.File('./images/shitpost/%s' %File_Selected ) )
                     else:
                         await message.channel.send(np.random.choice(shitpost_random_file ))
+                await message.delete()
                         
                 if Fredag_post and int(time.strftime('%w',time.gmtime())) != 5:
                     Fredag_post = False
