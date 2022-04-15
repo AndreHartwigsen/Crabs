@@ -361,15 +361,22 @@ def giffile_finder():
     return [s for s in gifs+videos if "media.discordapp.net" not in s],[s for s in shitpost_gifs+shitpost_videos if "media.discordapp.net" not in s]
 random_file,shitpost_random_file = giffile_finder()
 sentences = []
+def gen_sentence(length):
+    msg = text_model.make_short_sentence(length)
+    while type(msg) != str:
+        msg = text_model.make_short_sentence(length)
+    return msg
 async def fill_markov_library(N=10000,length=250):
+    global sentences
     while len(sentences)<N:
-        sentences.append(text_model.make_short_sentence(length))
+        sentences.append(gen_sentence(length))
+    sentences = [s for s in sentences if type(s) == str]
 async def refill_markov_library(N=10000,length=250):
     for i in range(len(sentences)):
-        sentences[i] = text_model.make_short_sentence(length)
+        sentences[i] = gen_sentence(length)
     if len(sentences)<N:
         while len(sentences)<N:
-            sentences.append(text_model.make_short_sentence(length))
+            sentences.append(gen_sentence(length))
 
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
@@ -378,12 +385,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
     length = np.random.randint(50,length)
     global sentences
     if question == None:
-        return text_model.make_short_sentence(length)
+        return gen_sentence(length)
     else:
         if len(sentences)<10000:
             for i in range(Nattempt):
-                sentences.append(text_model.make_short_sentence(length))
-            sentences = unique(sentences)
+                sentences.append(gen_sentence(length))
+            sentences = [s for s in unique(sentences) if type(s) == str]
         
         
         for s in remove_characters:
@@ -407,7 +414,7 @@ def cont_sentence(msg,server_id=466791064175509516,tries=150):
     starter = msg.split()[-1]
     try:
         out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
-        while out == None:
+        while type(out) != str:
             out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
         return invalid_user_fix(" ".join(msg.split()[1:] + out.split()[1:]),server_id)
     except:
@@ -747,7 +754,7 @@ async def on_message(message):
     
     
     
-    if message.author != client.user and message.channel.id not in repeat_block_channels:
+    if message.author != client.user and message.channel.id not in repeat_block_channels and len(message.content.lower())>0:
         if message.content.lower().split()[0] in ["fbrank","fblevel","fbinfo"]:
             search_ID = message.author.id 
             if len(message.content.lower().split())>1:
@@ -1120,7 +1127,7 @@ async def on_message(message):
                     Fredag_post = True
                 else:
                     
-                    link_or_file = np.random.choice(["Link","File"],p=[0.85,0.15])
+                    link_or_file = np.random.choice(["Link","File"],p=[0.8,0.2])
                     if link_or_file == "File":
                         File_Selected = Link_selector([s for s in os.listdir("./images/shitpost/") if '.ini' not in s])
                         while 'friday33' in File_Selected:
