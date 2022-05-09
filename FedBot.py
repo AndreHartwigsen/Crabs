@@ -361,15 +361,22 @@ def giffile_finder():
     return [s for s in gifs+videos if "media.discordapp.net" not in s],[s for s in shitpost_gifs+shitpost_videos if "media.discordapp.net" not in s]
 random_file,shitpost_random_file = giffile_finder()
 sentences = []
+def gen_sentence(length):
+    msg = text_model.make_short_sentence(length)
+    while type(msg) != str:
+        msg = text_model.make_short_sentence(length)
+    return msg
 async def fill_markov_library(N=10000,length=250):
+    global sentences
     while len(sentences)<N:
-        sentences.append(text_model.make_short_sentence(length))
+        sentences.append(gen_sentence(length))
+    sentences = [s for s in sentences if type(s) == str]
 async def refill_markov_library(N=10000,length=250):
     for i in range(len(sentences)):
-        sentences[i] = text_model.make_short_sentence(length)
+        sentences[i] = gen_sentence(length)
     if len(sentences)<N:
         while len(sentences)<N:
-            sentences.append(text_model.make_short_sentence(length))
+            sentences.append(gen_sentence(length))
 
 def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=[',','.','?','!'],
                        ignore_words = ['bot','fed','fedbot','markov','the','a','an','that','when','what','your','and','not','you','dont']
@@ -407,7 +414,7 @@ def cont_sentence(msg,server_id=466791064175509516,tries=150):
     starter = msg.split()[-1]
     try:
         out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
-        while out == None:
+        while type(out) != str:
             out = text_model.make_sentence_with_start(starter,strict=True,tries=50)
         return invalid_user_fix(" ".join(msg.split()[1:] + out.split()[1:]),server_id)
     except:
@@ -492,6 +499,7 @@ mention_users = True
 Fun = True
 N_requirement = 3
 Fredag_post = False
+shitpost_delete = False
 
 T0 = [0]
 Trusted_IDs = list(np.loadtxt('Trusted_IDs.txt',np.int64)) ; Temp_Trusted = []
@@ -731,7 +739,7 @@ async def on_message(message):
         
 
     speak_permission = True
-    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post , mention_users
+    global Fun, admin_dink_time_override, Trusted_IDs, Sponsor_message, Temp_Trusted , Fredag_post , mention_users , shitpost_delete
 
     if message.author.id in Trusted_IDs and message.content.lower() == "reset score":
         await message.reply("Fedbot™️ resetting score.",delete_after=3)
@@ -747,7 +755,7 @@ async def on_message(message):
     
     
     
-    if message.author != client.user and message.channel.id not in repeat_block_channels:
+    if message.author != client.user and message.channel.id not in repeat_block_channels and len(message.content.lower())>0:
         if message.content.lower().split()[0] in ["fbrank","fblevel","fbinfo"]:
             search_ID = message.author.id 
             if len(message.content.lower().split())>1:
@@ -907,9 +915,10 @@ async def on_message(message):
                 
                 
         elif message.content.lower() in ["fill sentences","fill library"] and message.author.id in Trusted_IDs:
-            await message.reply("Fedbot™️ library filler activated.",delete_after=3)
+            await message.channel.send("Fedbot™️ library filler activated.",delete_after=3)
             await fill_markov_library()
             await message.reply("Fedbot™️ library filler finished.",delete_after=5)
+            await message.delete()
         elif message.content.lower() in ["refill sentences","refill library"] and message.author.id in Trusted_IDs:
             await message.reply("Fedbot™️ library refiller activated.",delete_after=3)
             await refill_markov_library()
@@ -1113,14 +1122,14 @@ async def on_message(message):
             if 'fbcum' == message.content.lower()  or 'cum' == message.content.lower() or 'sborra' == message.content.lower():
                 await message.channel.trigger_typing()
                 await message.channel.send(file=discord.File('./images/cum/%s' % Link_selector([s for s in os.listdir("./images/cum/") if '.ini' not in s])) )        
-            if 'fbshitpost' == message.content.lower()[:10]  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
+            if 'fbshitpost' == message.content.lower()  or 'shitpost' == message.content.lower() or 'lortepæl' == message.content.lower() or '💩 post' == message.content.lower():
                 await message.channel.trigger_typing()
                 if not Fredag_post and int(time.strftime('%w',time.gmtime())) == 5:
-                    await message.reply('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
+                    await message.channel.send('NU ÄR DET FREDAG!!!',file=discord.File('./images/shitpost/friday33.mp4'))
                     Fredag_post = True
                 else:
                     
-                    link_or_file = np.random.choice(["Link","File"],p=[0.85,0.15])
+                    link_or_file = np.random.choice(["Link","File"],p=[0.8,0.2])
                     if link_or_file == "File":
                         File_Selected = Link_selector([s for s in os.listdir("./images/shitpost/") if '.ini' not in s])
                         while 'friday33' in File_Selected:
@@ -1128,9 +1137,20 @@ async def on_message(message):
                         await message.channel.send(file=discord.File('./images/shitpost/%s' %File_Selected ) )
                     else:
                         await message.channel.send(np.random.choice(shitpost_random_file ))
+                if shitpost_delete:
+                    await message.delete()
                         
                 if Fredag_post and int(time.strftime('%w',time.gmtime())) != 5:
                     Fredag_post = False
+            if "toggle shitpost delete" == message.content.lower() and message.author.id in Trusted_IDs:
+                if shitpost_delete:
+                    shitpost_delete = False
+                    await message.reply("now no longer deleting shitpost command",delete_after=5)
+                    await message.delete()
+                elif not shitpost_delete:
+                    shitpost_delete = True
+                    await message.reply("now deleting shitpost command",delete_after=5)
+                    await message.delete()
             
             
             
