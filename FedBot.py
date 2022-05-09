@@ -385,12 +385,12 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
     length = np.random.randint(50,length)
     global sentences
     if question == None:
-        return text_model.make_short_sentence(length)
+        return gen_sentence(length)
     else:
         if len(sentences)<10000:
             for i in range(Nattempt):
-                sentences.append(text_model.make_short_sentence(length))
-            sentences = unique(sentences)
+                sentences.append(gen_sentence(length))
+            sentences = [s for s in unique(sentences) if type(s) == str]
         
         
         for s in remove_characters:
@@ -431,7 +431,7 @@ def Generate_sentence(pct=markov_chance_percentage,question=None,length = 250,se
         return np.random.choice([invalid_user_fix(msg,server_id),np.random.choice(random_file)],p=[0.85,0.15])
     else:
         return None
-    
+
 
 
 
