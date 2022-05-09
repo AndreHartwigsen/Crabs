@@ -937,7 +937,7 @@ async def on_message(message):
                 await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
         
-        elif message.reference is not None:
+        elif message.reference is not None and client.user in message.mentions:
             messg = await client.get_channel(message.channel.id).fetch_message(message.reference.message_id)
             if messg.author == client.user:
                 await message.channel.trigger_typing()
@@ -956,7 +956,7 @@ async def on_message(message):
                     
                     
                     
-        elif client.user in message.mentions or 'fedbot' in message.content.lower() or "fed bot" in message.content.lower() or "markov" in message.content.lower():
+        elif 'fedbot' in message.content.lower() or "fed bot" in message.content.lower() or "markov" in message.content.lower() or client.user in message.mentions:
             await message.channel.trigger_typing()
             if mom_mention(message.content.lower()):
                 await asyncio.sleep(4)
