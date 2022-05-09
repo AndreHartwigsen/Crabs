@@ -325,7 +325,7 @@ def MarkovModel2(directory='./MarkovSource/',Text_only = False):
                 out.append(remainder[:index])
             remainder = remainder[index+1:]
         return out
-    files = [directory+s for s in os.listdir(directory) if "Logged" not in s]+['./FedData/'+s for s in os.listdir('./FedData/') if "Logged" in s]
+    files = [directory+s for s in os.listdir(directory) if "Logged" not in s]+['./FedData/'+s for s in os.listdir('./FedData/') if "Logged" in s and "473588284597993475" not in s]
     text = []
     for s in files:
         if 'Logged' in s:
@@ -358,7 +358,7 @@ def giffile_finder():
     shitpost_gifs = [fixxer(str(s)) for i,s in enumerate(shitpost_messages) if "http" in str(s) and ".gif" in str(s)]
     shitpost_videos = [fixxer(str(s)) for i,s in enumerate(shitpost_messages) if "http" in str(s) and "cdn.discordapp.com" in str(s)]
     
-    return [s for s in gifs+videos if "media.discordapp.net" not in s],[s for s in shitpost_gifs+shitpost_videos if "media.discordapp.net" not in s]
+    return unique([s for s in gifs+videos if "media.discordapp.net" not in s]),unique([s for s in shitpost_gifs+shitpost_videos if "media.discordapp.net" not in s])
 random_file,shitpost_random_file = giffile_finder()
 sentences = []
 def gen_sentence(length):
@@ -579,7 +579,7 @@ def dt_to_time(dt):
 points_lower = 15
 points_upper = 25
 FedBot_extra  = 20
-bot_channels = [803014667856904242,69]
+bot_channels = [803014667856904242,921404641625899028]
 
 
 def reset_score(LOC = "./FedData/",time_points = 60):
@@ -936,7 +936,7 @@ async def on_message(message):
             if p3 != None:
                 await message.channel.send(p3,allowed_mentions=discord.AllowedMentions(users=mention_users))
         
-        elif message.content.lower()[:5] == "mcont" or message.content.lower()[:9] == "mcontinue":
+        elif (message.content.lower()[:5] == "mcont" or message.content.lower()[:9] == "mcontinue") and message.channel.id in bot_channels:
             generate = cont_sentence(message.content,server_id=message.guild.id)
             p1,p2,p3 = emoji_splitter(str(generate))
             if p1 != None:
@@ -1154,7 +1154,7 @@ async def on_message(message):
             
             
             
-            if 'wave' == message.content.lower()[:4]:
+            if 'wave' == message.content.lower()[:4] and message.channel.id in bot_channels:
                 await message.channel.trigger_typing()
                 T_wave_cooldown = 30*60
                 if countdown_timer(message.author.id,'emoji',T_wave_cooldown) or (message.author.id in Trusted_IDs or message.author.id in Temp_Trusted):
