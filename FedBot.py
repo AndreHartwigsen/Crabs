@@ -8,6 +8,7 @@ import sys
 import requests
 import markovify as mk
 import datetime
+# import aiohttp
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 nest_asyncio.apply()
@@ -1075,19 +1076,13 @@ async def on_message(message):
 
 
         
-
-        
         if "?live" in message.content.lower()[:5] or "!live" in message.content.lower()[:5]:
             channel_Name = message.content[6:]
             if live_on_twitch(channel_Name):
                 await message.channel.send("YAY! %s is live right now! https://www.twitch.tv/%s" % (channel_Name,channel_Name))
             else:
                 await message.channel.send("Oh nooo... %s seems to be offline :(" % (channel_Name))
-        
-            
-            
 
-        
         
         if 'fbspam' in message.content.lower()[:6] and message.author.id in Trusted_IDs:
             if not Fun:
@@ -1107,7 +1102,7 @@ async def on_message(message):
         if 'bbspam' in message.content.lower()[:6] and message.author.id not in Trusted_IDs:
             await message.channel.send(f'{message.author.mention}. Only LeCerial and Truxa have the right to touch sperm. 👀')
             
-        if Fun: 
+        if Fun:
             if contained_in_list(message.content.lower(),["cereal music","cerial music","ceriel music","andre music","danish music","dane music"]):
                 if countdown_timer(message.author.id,'cerial music',5*60) or message.author.id in Trusted_IDs:
                     await message.channel.trigger_typing()
@@ -1154,7 +1149,7 @@ async def on_message(message):
             
             
             
-            if 'wave' == message.content.lower()[:4] and message.channel.id in bot_channels:
+            if 'wave' == message.content.lower()[:4] and (message.channel.id in bot_channels or message.author.id in Trusted_IDs):
                 await message.channel.trigger_typing()
                 T_wave_cooldown = 30*60
                 if countdown_timer(message.author.id,'emoji',T_wave_cooldown) or (message.author.id in Trusted_IDs or message.author.id in Temp_Trusted):
@@ -1163,6 +1158,38 @@ async def on_message(message):
                 else:
                     t_left = countdown_timer_left(message.author.id,'emoji',T_wave_cooldown)
                     await message.reply('This command has a %i minute cooldown per user. (%i min left)' % (T_wave_cooldown/60,t_left) )
+            
+            
+            if "real" == message.content.lower() and np.random.rand()>0.8:
+                await message.channel.send("and true")
+            if "true" == message.content.lower() and np.random.rand()>0.8:
+                await message.channel.send("Real")
+            if message.content.lower() in ["i'm losing it","i am losing it","i am going insane","i'm going insane","i hate my life","i hate myself"]:
+                if countdown_timer(message.author.id,'same post',24*60*60):
+                    await message.channel.send("same")
+            if message.author.id == 973191883708846090 and np.random.rand()>0.95:
+                if countdown_timer(message.author.id,'Kepe Sob',4*60*60):
+                    await message.channel.send("😭")
+            if message.author.id == 294790386105188352 and np.random.rand()>0.99:
+                if countdown_timer(message.author.id,'Harrison flag',12*60*60):
+                    await message.channel.send("🇬🇧")
+            if message.author.id == 343117244563193857 and np.random.rand()>0.98 and "<:cringecat:717096199911375009>" not in message.content:
+                if countdown_timer(message.author.id,'catstare pesto',12*60*60):
+                    await message.channel.send("<:cringecat:717096199911375009>")
+            if message.author.id == 236902492955344898 and np.random.rand()>0.75 and len(message.content)>199 and message.channel.id == 804316586810540034:
+                if countdown_timer(message.author.id,'Lui pills',24*60*60):
+                    await message.channel.send("https://tenor.com/view/ok-schizo-ok-schizo-schizophrenia-gibbon-gif-23667455")
+                    await message.channel.send("Don't forget to take your meds Lui.")
+            # if "meme" == message.content.lower():
+            #     generate = Generate_sentence(100,server_id=message.guild.id)
+            #     p1,p2,p3 = emoji_splitter(str(generate))
+            #     embed = discord.Embed(title=p2, description="")
+            #     async with aiohttp.ClientSession() as cs:
+            #         async with cs.get('https://www.reddit.com/r/dankmemes/new.json?sort=hot') as r:
+            #             res = await r.json()
+            #             embed.set_image(url=res['data']['children'] [random.randint(0, 25)]['data']['url'])
+            #             await message.channel.send(embed=embed)
+                
             
             
         if 'trust' == message.content.lower()[:5] and message.author.id in Trusted_IDs:
