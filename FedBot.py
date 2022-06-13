@@ -1167,15 +1167,15 @@ async def on_message(message):
             if message.content.lower() in ["i'm losing it","i am losing it","i am going insane","i'm going insane","i hate my life","i hate myself"]:
                 if countdown_timer(message.author.id,'same post',24*60*60):
                     await message.channel.send("same")
-            if message.author.id == 973191883708846090 and np.random.rand()>0.95:
+            if message.author.id == 973191883708846090 and np.random.rand()>0.90:
                 if countdown_timer(message.author.id,'Kepe Sob',4*60*60):
                     await message.channel.send("😭")
             if message.author.id == 294790386105188352 and np.random.rand()>0.99:
                 if countdown_timer(message.author.id,'Harrison flag',12*60*60):
                     await message.channel.send("🇬🇧")
-            if message.author.id == 343117244563193857 and np.random.rand()>0.98 and "<:cringecat:717096199911375009>" not in message.content:
+            if message.author.id == 343117244563193857 and np.random.rand()>0.99 and "<:cringecat:717096199911375009>" not in message.content:
                 if countdown_timer(message.author.id,'catstare pesto',12*60*60):
-                    await message.channel.send("<:cringecat:717096199911375009>")
+                    await message.channel.send("<:cringecat:717096199911375009>",delete_after=7)
             if message.author.id == 236902492955344898 and np.random.rand()>0.75 and len(message.content)>199 and message.channel.id == 804316586810540034:
                 if countdown_timer(message.author.id,'Lui pills',24*60*60):
                     await message.channel.send("https://tenor.com/view/ok-schizo-ok-schizo-schizophrenia-gibbon-gif-23667455")
