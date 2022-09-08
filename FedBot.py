@@ -77,8 +77,13 @@ def live_on_twitch(channelName='therealgpf'):
         return False
 
 
-
-
+def get_gif(searchTerm="Ryan Gosling",random=True,token='AIzaSyCqLaEBIdFjeUUvASFvOh4LbjeL69fAaF8'):
+    if random:
+        query = requests.get("https://tenor.googleapis.com/v2/search?q=%s&key=%s&client_key=%s&limit=%s" % (searchTerm, token, "Crabs",  50)).json()
+        return np.random.choice(query["results"])["url"]
+    else:
+        query = requests.get("https://tenor.googleapis.com/v2/search?q=%s&key=%s&client_key=%s&limit=%s" % (searchTerm, token, "Crabs",  1)).json()
+        return query["results"][0]["url"]
 
 
 import random
@@ -366,7 +371,7 @@ def gen_sentence(length):
     msg = text_model.make_short_sentence(length)
     while type(msg) != str:
         msg = text_model.make_short_sentence(length)
-    return invalid_user_fix(msg)
+    return msg
 async def fill_markov_library(N=10000,length=250):
     global sentences
     while len(sentences)<N:
@@ -394,22 +399,26 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             sentences = [s for s in unique(sentences) if type(s) == str]
         
         
-        for s in remove_characters:
-            question.replace(s,'')
-        words = unique(question.lower().split())
-        Ncommon = np.zeros(len(sentences))
-        for y in range(len(words)):
-            if len(words[y])>0 and words[y] not in ignore_words:
-                for i in range(len(sentences)):
-                    if words[y] in sentences[i].lower().split():
-                        Ncommon[i] += len(words[y])
-        returner = sentences[np.argmax(Ncommon)]
-        sentences.remove(returner)
-        if time.time()-t_start > 3:
-            return returner
+        if len(question.split()) <= 4 and np.random.rand()<0.2:
+            return get_gif(question)
         else:
-            time.sleep(3)
-            return returner
+            for s in remove_characters:
+                question.replace(s,'')
+            words = unique(question.lower().split())
+            Ncommon = np.zeros(len(sentences))
+            for y in range(len(words)):
+                if len(words[y])>0 and words[y] not in ignore_words:
+                    for i in range(len(sentences)):
+                        if words[y] in sentences[i].lower().split():
+                            Ncommon[i] += len(words[y])
+            returner = sentences[np.argmax(Ncommon)]
+            sentences.remove(returner)
+            
+            if time.time()-t_start < 3:
+                return returner
+            else:
+                time.sleep(3)
+                return returner
 
 def cont_sentence(msg,server_id=466791064175509516,tries=150):
     starter = msg.split()[-1]
@@ -580,7 +589,7 @@ def dt_to_time(dt):
 points_lower = 15
 points_upper = 25
 FedBot_extra  = 20
-bot_channels = [803014667856904242,921404641625899028]
+bot_channels = [803014667856904242,921404641625899028,870997447374176267]
 
 
 def reset_score(LOC = "./FedData/",time_points = 60):
@@ -1158,19 +1167,25 @@ async def on_message(message):
                 else:
                     t_left = countdown_timer_left(message.author.id,'emoji',T_wave_cooldown)
                     await message.reply('This command has a %i minute cooldown per user. (%i min left)' % (T_wave_cooldown/60,t_left) )
+            if "mgif" == message.content.lower()[:4]:
+                await message.reply(get_gif(message.content[4:],random=False),mention_author=False)
             
             
             if "real" == message.content.lower() and np.random.rand()>0.8:
                 await message.channel.send("and true")
             if "true" == message.content.lower() and np.random.rand()>0.8:
                 await message.channel.send("Real")
+            if "literally me" == message.content.lower() and np.random.rand()>0.5:
+                if countdown_timer(message.author.id,'Ryan gosling',60*60):
+                    await message.reply(get_gif())
+            
             if message.content.lower() in ["i'm losing it","i am losing it","i am going insane","i'm going insane","i hate my life","i hate myself"]:
                 if countdown_timer(message.author.id,'same post',24*60*60):
                     await message.channel.send("same")
             if message.author.id == 973191883708846090 and np.random.rand()>0.90:
                 if countdown_timer(message.author.id,'Kepe Sob',4*60*60):
                     await message.channel.send("😭")
-            if message.author.id == 294790386105188352 and np.random.rand()>0.99:
+            if message.author.id == 294790386105188352 and np.random.rand()>0.995:
                 if countdown_timer(message.author.id,'Harrison flag',12*60*60):
                     await message.channel.send("🇬🇧")
             if message.author.id == 343117244563193857 and np.random.rand()>0.99 and "<:cringecat:717096199911375009>" not in message.content:
