@@ -366,7 +366,7 @@ def gen_sentence(length):
     msg = text_model.make_short_sentence(length)
     while type(msg) != str:
         msg = text_model.make_short_sentence(length)
-    return msg
+    return invalid_user_fix(msg)
 async def fill_markov_library(N=10000,length=250):
     global sentences
     while len(sentences)<N:
