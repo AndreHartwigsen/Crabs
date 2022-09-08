@@ -399,7 +399,7 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             sentences = [s for s in unique(sentences) if type(s) == str]
         
         
-        if len(question.split()) <= 4 and np.random.rand()<0.2:
+        if len(question.split()) <= 4 and np.random.rand()<0.5:
             return get_gif(question)
         else:
             for s in remove_characters:
@@ -589,7 +589,7 @@ def dt_to_time(dt):
 points_lower = 15
 points_upper = 25
 FedBot_extra  = 20
-bot_channels = [803014667856904242,921404641625899028,870997447374176267]
+bot_channels = [803014667856904242,921404641625899028]
 
 
 def reset_score(LOC = "./FedData/",time_points = 60):
