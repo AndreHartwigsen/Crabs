@@ -399,7 +399,7 @@ def Sentence_relevance(question=None,length=250,Nattempt=50,remove_characters=['
             sentences = [s for s in unique(sentences) if type(s) == str]
         
         
-        if len(question.split()) <= 4 and np.random.rand()<0.2:
+        if len(question.split()) <= 8 and np.random.rand()<0.2:
             return get_gif(question)
         else:
             for s in remove_characters:
@@ -684,7 +684,7 @@ def score_update(message,LOC = "./FedData/"):
     filename = 'LoggedText%i.csv'%(channel)
     files = [s for s in os.listdir(LOC) if "LoggedText" in s]
     if filename in files:
-        df = pd.DataFrame({'author':message.author.name , 'message':message.content + [" " + message.attachments[0].url][0] if len(message.attachments)>0 else "" , 
+        df = pd.DataFrame({'author':message.author.name , 'message':message.content + (" " + message.attachments[0].url if len(message.attachments)>0 else "") , 
                            'ID':ID , 'date':message.id , "datetime":timestamp , "channel":channel},index=[0])
         dff = pd.read_csv(LOC+filename)
         dfa = pd.concat([df,dff])
@@ -1023,12 +1023,12 @@ async def on_message(message):
                 i+=1
                 if len(d.content)>0: 
                     if skipper == None or skipper not in d.content:
-                        messages.append(d.content + " " + d.attachments[0].url if len(d.attachments)>0 else "")
+                        messages.append(d.content + (" " + d.attachments[0].url if len(d.attachments)>0 else ""))
                         author.append(d.author.name)
                         date.append(d.id)
                         id_author.append(d.author.id)
                         datetime.append(d.created_at)
-                if len(d.attachments)>0 and len(d.content) == 0:
+                elif len(d.attachments)>0 and len(d.content) == 0:
                     if skipper == None or skipper not in d.content:
                         messages.append(d.attachments[0].url)
                         author.append(d.author.name)
@@ -1168,7 +1168,7 @@ async def on_message(message):
                     t_left = countdown_timer_left(message.author.id,'emoji',T_wave_cooldown)
                     await message.reply('This command has a %i minute cooldown per user. (%i min left)' % (T_wave_cooldown/60,t_left) )
             if "mgif" == message.content.lower()[:4]:
-                await message.reply(get_gif(message.content[4:],random=False),mention_author=False)
+                await message.reply(get_gif(message.content[4:]),mention_author=False)
             
             
             if "real" == message.content.lower() and np.random.rand()>0.8:
